@@ -1,4 +1,5 @@
 server:
+#  port: 80
   port: 8080
 spring:
   application:
@@ -19,6 +20,7 @@ mybatis-plus:
       id-type: ASSIGN_ID
 
 reggie:
+#  path: /usr/local/reggie/upload/
   path: D:\Java\项目\瑞吉外卖\myCode\upload\
 
 sendMsg:
