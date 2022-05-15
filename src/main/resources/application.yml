@@ -19,7 +19,7 @@ mybatis-plus:
       id-type: ASSIGN_ID
 
 reggie:
-  path: D:\Java\项目\瑞吉外卖\myCode\reggie_take_out\upload\
+  path: D:\Java\项目\瑞吉外卖\myCode\upload\
 
 sendMsg:
   secretId: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
@@ -27,6 +27,5 @@ sendMsg:
   connTimeout: 5
   sdkAppId: 1400677800
   signName: 蛋蛋编程
-  # templateId: 1401550
   templateId: 1401840
   msgHead: 【瑞吉外卖】
