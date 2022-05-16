@@ -2,6 +2,7 @@ package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Orders;
 import com.itheima.reggie.entity.QueryPageDate;
@@ -51,6 +52,8 @@ public class OrdersController {
         Page<Orders> pageInfo = new Page<Orders>(page, pageSize);
         //构造条件构造器
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        //按照id查询
+        queryWrapper.eq(Orders::getUserId, BaseContext.getCurrentId());
         //添加排序条件
         queryWrapper.orderByDesc(Orders::getOrderTime);
         //执行查询

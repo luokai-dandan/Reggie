@@ -5,10 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.UserService;
+import com.itheima.reggie.utils.SMSUtils;
+import com.itheima.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -25,6 +29,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    //注入redis
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     // 腾讯云短信相关参数
     @Value("${sendMsg.secretId}")
@@ -66,6 +74,9 @@ public class UserController {
             // 需要将生成的验证码保存到Session中
             session.setAttribute(phoneNumber, verificationCode);
 
+            //将生成的验证码缓存到redis缓存中，并且设置有效期为5分钟
+            redisTemplate.opsForValue().set(phoneNumber, verificationCode, Long.parseLong(connTimeout), TimeUnit.MINUTES);
+
             return R.success("手机验证码发送成功");
         }
 
@@ -81,7 +92,10 @@ public class UserController {
         String code = map.get("code");
 
         //从Session中获取保存的验证码
-        String codeInSession = (String) session.getAttribute(phone);
+        //String codeInSession = (String) session.getAttribute(phone);
+
+        //从redis中获取缓存的验证码
+        String codeInSession = (String) redisTemplate.opsForValue().get(phone);
 
         //进行验证码的比对
         if (codeInSession != null && code.equals(codeInSession)) {
@@ -100,7 +114,10 @@ public class UserController {
             }
             //将用户信息放入session
             session.setAttribute("user", user.getId());
-            //登陆成功
+
+            //登陆成功，删除redis中缓存的验证码
+            redisTemplate.delete(phone);
+
             return R.success(user);
         }
 
