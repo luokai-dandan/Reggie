@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,6 +46,8 @@ public class SetmealController {
      * @return
      */
     @PostMapping
+    //删除setmealCache分类下的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> save(@RequestBody SetmealDto setmealDto){
 
         log.info("dishDto: {}",setmealDto);
@@ -137,6 +141,8 @@ public class SetmealController {
      * @return
      */
     @DeleteMapping
+    //删除setmealCache分类下的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids){
 
         setmealService.deleteWithDish(ids);
@@ -170,6 +176,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache",  key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
 
         //构造查询条件
