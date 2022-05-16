@@ -87,6 +87,11 @@
             <artifactId>tencentcloud-sdk-java</artifactId>
             <version>3.1.270</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
