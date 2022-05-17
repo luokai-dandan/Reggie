@@ -1,10 +1,9 @@
 server:
-#  port: 80
   port: 8080
 spring:
   application:
     name: reggie_take_out
-
+# 单数据库配置
 #  datasource:
 #    druid:
 #      driver-class-name: com.mysql.cj.jdbc.Driver
@@ -47,6 +46,7 @@ spring:
     allow-bean-definition-overriding: true
 # 以上为读写分离
 
+# redis
   redis:
     host: 192.168.24.129
     port: 6379
@@ -54,6 +54,7 @@ spring:
   cache:
     redis:
       time-to-live: 1800000 #设置缓存过期时间（ms）
+# MybatisPlus
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射

@@ -1,10 +1,9 @@
 server:
-#  port: 80
   port: 8080
 spring:
   application:
     name: reggie_take_out
-
+# 单数据库配置
 #  datasource:
 #    druid:
 #      driver-class-name: com.mysql.cj.jdbc.Driver
