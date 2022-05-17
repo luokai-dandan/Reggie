@@ -7,7 +7,7 @@ public interface OrdersService extends IService<Orders> {
 
     /**
      * 用户下单
-     * @param orders
+     * @param order
      */
-    public void submit(Orders orders);
+    public void submit(Orders order);
 }

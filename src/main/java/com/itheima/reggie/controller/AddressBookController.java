@@ -44,7 +44,6 @@ public class AddressBookController {
             addressBookService.updateById(one);
         }
 
-
         //条件构造器
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
         //SQL:select * from address_book where user_id = ? order by update_time desc

@@ -20,14 +20,14 @@ spring:
       master:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.24.129:3306/reggie?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://192.168.24.129:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: MySQL5.7
       # 从数据源
       slave:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.24.130:3306/reggie?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://192.168.24.130:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: MySQL5.7
     masterslave:
@@ -51,9 +51,27 @@ spring:
     host: 192.168.24.129
     port: 6379
     database: 0
+    jedis:
+      pool:
+        max-active: 512
+        max-idle: 256
+        min-idle: 256
+        max-wait: -1
   cache:
     redis:
       time-to-live: 1800000 #设置缓存过期时间（ms）
+
+  # mongodb存储订单信息
+  data:
+    mongodb:
+      # 主机地址
+      host: 192.168.24.129
+      # 数据库
+      database: reggiedb
+      # 默认端口是27017
+      port: 27017
+      #也可以使用uri连接
+      #uri: mongodb://192.168.40.134:27017/articledb
 # MybatisPlus
 mybatis-plus:
   configuration:
