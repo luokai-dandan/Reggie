@@ -13,6 +13,7 @@ import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +39,12 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Autowired
     private OrderDetailService orderDetailService;
 
-    //mongodb service
+    //kafka
     @Autowired
-    private com.itheima.reggie.mongo.service.OrderService orderService;
+    private KafkaTemplate<String, Order> kafkaTemplate;
+
+    //kafka消息主题
+    private final static String TOPIC_NAME = "order-topic";
 
     /**
      * 用户下单
@@ -112,8 +116,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Order orderMongo = new Order();
         BeanUtils.copyProperties(order, orderMongo);
 
-        //向mongodb中插入数据
-        orderService.saveOrder(orderMongo);
+        //kafka发送订单消息
+        String orderKey = "order_"+orderMongo.getId().toString();
+        kafkaTemplate.send(TOPIC_NAME,0, orderKey, orderMongo);
 
         //向订单表插入数据，一条数据
         this.save(order);

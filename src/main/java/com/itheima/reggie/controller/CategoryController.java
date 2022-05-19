@@ -5,6 +5,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.service.CategoryService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +22,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/category")
+@Api(tags = "菜品和套餐分类相关接口")
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
 
     @PostMapping
+    @ApiOperation(value = "分类新增接口")
+    @ApiImplicitParam(name = "category", value = "分类实体")
     public R<String> add(@RequestBody Category category){
         log.info("category: {}", category.toString());
         categoryService.save(category);
@@ -38,6 +45,11 @@ public class CategoryController {
      * @return
      */
     @GetMapping("/page")
+    @ApiOperation(value = "分类分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页码", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true)
+    })
     public R<Page<Category>> page(int page, int pageSize){
         log.info("page = {}, pageSize = {}", page, pageSize);
 
@@ -60,6 +72,8 @@ public class CategoryController {
      * @return
      */
     @PutMapping
+    @ApiOperation(value = "分类修改接口")
+    @ApiImplicitParam(name = "category", value = "分类实体")
     public R<String> update(@RequestBody Category category){
         log.info("employee:{}", category.toString());
 
@@ -73,6 +87,8 @@ public class CategoryController {
      * @return
      */
     @DeleteMapping
+    @ApiOperation(value = "分类删除接口")
+    @ApiImplicitParam(name = "ids", value = "分类编号")
     public R<String> delete(Long ids){
 
         log.info("删除分类，id为：{}", ids);
@@ -88,6 +104,8 @@ public class CategoryController {
      * @return
      */
     @GetMapping("/list")
+    @ApiOperation(value = "分类列表查询接口")
+    @ApiImplicitParam(name = "category", value = "分类实体")
     public R<List<Category>>list(Category category){
 
         log.info("category: {}",category.toString());

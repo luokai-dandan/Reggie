@@ -8,6 +8,10 @@ import com.itheima.reggie.entity.Orders;
 import com.itheima.reggie.entity.QueryPageDate;
 import com.itheima.reggie.mongo.entity.Order;
 import com.itheima.reggie.service.OrdersService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -21,6 +25,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/order")
+@Api(tags = "订单相关接口")
 public class OrdersController {
 
     @Autowired
@@ -37,6 +42,8 @@ public class OrdersController {
      * @return
      */
     @PostMapping("/submit")
+    @ApiOperation(value = "订单提交接口")
+    @ApiImplicitParam(name = "order", value = "订单实体")
     public R<String> submit(@RequestBody Orders order) {
 
         ordersService.submit(order);
@@ -76,6 +83,11 @@ public class OrdersController {
      * @return
      */
     @GetMapping("/userPage")
+    @ApiOperation(value = "手机端订单分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页码", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true)
+    })
     public R<Page<Order>> userPage(int page, int pageSize) {
         log.info("page = {}, pageSize = {}", page, pageSize);
 
@@ -139,6 +151,8 @@ public class OrdersController {
      * @return
      */
     @GetMapping("/page")
+    @ApiOperation(value = "管理端订单分页查询接口")
+    @ApiImplicitParam(name = "queryPageDate", value = "分页查询实体")
     public R<Page<Order>> page(QueryPageDate queryPageDate) {
         List<Order> pageList = orderService.getPageList(queryPageDate);
 
@@ -156,6 +170,8 @@ public class OrdersController {
      * @return
      */
     @PutMapping
+    @ApiOperation(value = "订单状态修改接口")
+    @ApiImplicitParam(name = "order", value = "订单实体")
     public R<String> status(@RequestBody Orders order){
 
         log.info("order: {}", order);

@@ -5,6 +5,10 @@ import com.github.qcloudsms.SmsSingleSenderResult;
 import com.github.qcloudsms.httpclient.HTTPException;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.utils.SMSUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +29,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/common")
+@Api(tags = "公共接口(上传下载图片)")
 public class CommonController {
 
     //从配置文件中拿到文件上传后的保存路径
@@ -38,6 +43,8 @@ public class CommonController {
      * @return
      */
     @PostMapping("/upload")
+    @ApiOperation(value = "图片上传接口")
+    @ApiImplicitParam(name = "file", value = "文件")
     //参数file必须和前端的name一致，否则无法收到参数
     public R<String> upload(MultipartFile file) {
         //file是个临时文件，需要转存到指定位置，否则本次请求完成后文件会删除
@@ -68,6 +75,11 @@ public class CommonController {
     }
 
     @GetMapping("/download")
+    @ApiOperation(value = "图片下载接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "name", value = "图片文件名", required = true),
+            @ApiImplicitParam(name = "response", value = "响应对象", required = true)
+    })
     public void download(String name, HttpServletResponse response) {
 
         try {

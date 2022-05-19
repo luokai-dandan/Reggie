@@ -2,9 +2,14 @@ package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +22,18 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestController
 @RequestMapping("/employee")
+@Api(tags = "员工相关接口")
 public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
 
     @PostMapping("/login")
+    @ApiOperation(value = "管理端员工登录接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "请求对象", required = true),
+            @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    })
     public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
 
         //1、将页面提交的密码password进行md5加密处理
@@ -60,6 +71,8 @@ public class EmployeeController {
      * @return
      */
     @PostMapping("/logout")
+    @ApiOperation(value = "管理端员工登出接口")
+    @ApiImplicitParam(name = "request", value = "请求对象")
     public R<String> logout(HttpServletRequest request){
         //清理Session中保存的当前登陆员工的id
         request.getSession().removeAttribute("employee");
@@ -73,6 +86,11 @@ public class EmployeeController {
      * @return
      */
     @PostMapping
+    @ApiOperation(value = "套餐分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "请求对象", required = true),
+            @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    })
     public R<String> save(HttpServletRequest request, @RequestBody Employee employee){
         log.info("新增员工，员工信息：{}", employee.toString());
 
@@ -101,6 +119,12 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/page")
+    @ApiOperation(value = "员工分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页码", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true),
+            @ApiImplicitParam(name = "name", value = "员工姓名", required = false)
+    })
     public R<Page<Employee>> page(int page, int pageSize, String name){
         log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
 
@@ -111,6 +135,8 @@ public class EmployeeController {
         //执行查询
         // 第一个参数为函数执行条件，只有name不为空才会执行下面代码，查询字段名为Employee::getName，参数为name的数据
         queryWrapper.like(StringUtils.isNotEmpty(name), Employee::getName, name);
+        //创建用户为1
+        queryWrapper.eq(Employee::getCreateUser, BaseContext.getCurrentId());
         //添加排序条件
         queryWrapper.orderByDesc(Employee::getUpdateTime);
         //执行查询
@@ -125,6 +151,11 @@ public class EmployeeController {
      * @return
      */
     @PutMapping
+    @ApiOperation(value = "员工信息修改接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "请求对象", required = true),
+            @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    })
     public R<String> update(HttpServletRequest request, @RequestBody Employee employee){
         log.info("employee:{}", employee.toString());
 
@@ -142,6 +173,8 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/{id}")
+    @ApiOperation(value = "员工信息查询接口")
+    @ApiImplicitParam(name = "id", value = "员工编号")
     public R<Employee> getById(@PathVariable Long id){
 
         log.info("根据id查询员工信息");

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 //复合索引
 // @CompoundIndex( def = "{'userid': 1, 'nickname': -1}")
 @Data
-public class Order implements Serializable {
+public class Order implements Serializable{
 
     private static final long serialVersionUID = 1L;
 

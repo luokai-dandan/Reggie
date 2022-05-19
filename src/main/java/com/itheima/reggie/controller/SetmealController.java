@@ -54,6 +54,7 @@ public class SetmealController {
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
     @ApiOperation(value = "新增套餐接口")
+    @ApiImplicitParam(name = "setmealDto", value = "套餐包装实体")
     public R<String> save(@RequestBody SetmealDto setmealDto){
 
         log.info("dishDto: {}",setmealDto);
@@ -126,6 +127,8 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/{id}")
+    @ApiOperation(value = "查询套餐接口")
+    @ApiImplicitParam(name = "id", value = "编号")
     public R<SetmealDto> get(@PathVariable Long id){
         log.info("id: {}",id);
 
@@ -140,6 +143,8 @@ public class SetmealController {
      * @return
      */
     @PutMapping
+    @ApiOperation(value = "修改套餐接口")
+    @ApiImplicitParam(name = "setmealDto", value = "套餐包装类")
     public R<String> update(@RequestBody SetmealDto setmealDto){
 
         log.info("dishDto: {}",setmealDto);
@@ -153,6 +158,8 @@ public class SetmealController {
      * @return
      */
     @DeleteMapping
+    @ApiOperation(value = "删除套餐接口")
+    @ApiImplicitParam(name = "ids", value = "编号数组")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids){
@@ -168,6 +175,11 @@ public class SetmealController {
      * @return
      */
     @PostMapping("/status/{status}")
+    @ApiOperation(value = "修改套餐售卖状态接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "status", value = "售卖状态", required = true),
+            @ApiImplicitParam(name = "ids", value = "编号数组", required = true)
+    })
     public R<String> updateStatus(@PathVariable Integer status,@RequestParam("ids") List<Long> ids){
         if (ids == null) {
             throw new CustomException("状态修改异常");
@@ -183,11 +195,13 @@ public class SetmealController {
     }
 
     /**
-     * 根据条件查询套餐
+     * 查询套餐列表
      * @param setmeal
      * @return
      */
     @GetMapping("/list")
+    @ApiOperation(value = "查询套餐列表接口")
+    @ApiImplicitParam(name = "setmeal", value = "套餐列表")
     @Cacheable(value = "setmealCache",  key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
 
