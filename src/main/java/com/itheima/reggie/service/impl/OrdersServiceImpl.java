@@ -156,7 +156,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //log.info("page = {}, pageSize = {}", page, pageSize);
 
         QueryPageDate queryPageDate = new QueryPageDate();
-        queryPageDate.setPageAndPageSize(page, pageSize);
+        queryPageDate.setPage(page);
+        queryPageDate.setPageSize(pageSize);
 
         List<Order> orderList = orderService.getPageList(queryPageDate);
 

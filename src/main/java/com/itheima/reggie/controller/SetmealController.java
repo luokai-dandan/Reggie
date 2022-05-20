@@ -47,7 +47,7 @@ public class SetmealController {
      */
     @GetMapping("/list")
     @ApiOperation(value = "查询套餐列表接口")
-    @ApiImplicitParam(name = "setmeal", value = "套餐列表")
+    //@ApiImplicitParam(name = "setmeal", value = "套餐列表")
     @Cacheable(value = "setmealCache",  key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
 
@@ -82,7 +82,7 @@ public class SetmealController {
      */
     @PostMapping
     @ApiOperation(value = "新增套餐接口")
-    @ApiImplicitParam(name = "setmealDto", value = "套餐包装实体")
+    //@ApiImplicitParam(name = "setmealDto", value = "套餐包装实体")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> add(@RequestBody SetmealDto setmealDto){
@@ -99,7 +99,7 @@ public class SetmealController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "查询套餐接口")
-    @ApiImplicitParam(name = "id", value = "编号")
+    //@ApiImplicitParam(name = "id", value = "编号")
     @Cacheable(value = "setmealCache",key = "#id", unless = "#result == null")
     public R<SetmealDto> get(@PathVariable Long id){
 
@@ -114,7 +114,7 @@ public class SetmealController {
      */
     @PutMapping
     @ApiOperation(value = "修改套餐接口")
-    @ApiImplicitParam(name = "setmealDto", value = "套餐包装类")
+    //@ApiImplicitParam(name = "setmealDto", value = "套餐包装类")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> update(@RequestBody SetmealDto setmealDto){
@@ -130,7 +130,7 @@ public class SetmealController {
      */
     @DeleteMapping
     @ApiOperation(value = "删除套餐接口")
-    @ApiImplicitParam(name = "ids", value = "编号数组")
+    //@ApiImplicitParam(name = "ids", value = "编号数组")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids){
@@ -148,8 +148,8 @@ public class SetmealController {
     @PostMapping("/status/{status}")
     @ApiOperation(value = "修改套餐售卖状态接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "status", value = "售卖状态", required = true),
-            @ApiImplicitParam(name = "ids", value = "编号数组", required = true)
+            @ApiImplicitParam(name = "ids", value = "编号数组", required = true),
+            @ApiImplicitParam(name = "status", value = "售卖状态", required = true)
     })
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)

@@ -83,7 +83,7 @@ public class EmployeeController {
      */
     @PostMapping("/logout")
     @ApiOperation(value = "管理端员工登出接口")
-    @ApiImplicitParam(name = "request", value = "请求对象")
+    //@ApiImplicitParam(name = "request", value = "请求对象")
     public R<String> logout(HttpServletRequest request) {
 
         Boolean logout = employeeService.logout(request);
@@ -120,7 +120,7 @@ public class EmployeeController {
      */
     @PostMapping
     @ApiOperation(value = "套餐分页查询接口")
-    @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    //@ApiImplicitParam(name = "employee", value = "员工实体")
     public R<String> save(@RequestBody Employee employee) {
 
         Boolean addEmployee = employeeService.addEmployee(employee);
@@ -135,7 +135,7 @@ public class EmployeeController {
      */
     @PutMapping
     @ApiOperation(value = "员工信息修改接口")
-    @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    //@ApiImplicitParam(name = "employee", value = "员工实体")
     public R<String> update(@RequestBody Employee employee) {
 
         Boolean update = employeeService.updateEmployee(employee);
@@ -150,7 +150,7 @@ public class EmployeeController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "员工信息查询接口")
-    @ApiImplicitParam(name = "id", value = "员工编号")
+    //@ApiImplicitParam(name = "id", value = "员工编号")
     public R<Employee> getById(@PathVariable Long id) {
 
         Employee employee = employeeService.getEmployeeById(id);

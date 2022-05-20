@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 @ApiModel("订单详情")
 public class OrdersDetail implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")

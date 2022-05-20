@@ -37,7 +37,7 @@ public class CategoryController {
      */
     @GetMapping("/list")
     @ApiOperation(value = "分类列表查询接口")
-    @ApiImplicitParam(name = "category", value = "分类实体")
+    //@ApiImplicitParam(name = "category", value = "分类实体")
     @Cacheable(value = "categoryCache", key = "#category.id + '_' + #category.type")
     public R<List<Category>> list(Category category) {
 
@@ -72,7 +72,7 @@ public class CategoryController {
      */
     @PostMapping
     @ApiOperation(value = "分类新增接口")
-    @ApiImplicitParam(name = "category", value = "分类实体")
+    //@ApiImplicitParam(name = "category", value = "分类实体")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> add(@RequestBody Category category) {
 
@@ -88,7 +88,7 @@ public class CategoryController {
      */
     @PutMapping
     @ApiOperation(value = "分类修改接口")
-    @ApiImplicitParam(name = "category", value = "分类实体")
+    //@ApiImplicitParam(name = "category", value = "分类实体")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> update(@RequestBody Category category) {
 
@@ -104,7 +104,7 @@ public class CategoryController {
      */
     @DeleteMapping
     @ApiOperation(value = "分类删除接口")
-    @ApiImplicitParam(name = "ids", value = "分类编号")
+    //@ApiImplicitParam(name = "ids", value = "分类编号")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> delete(Long ids) {
 

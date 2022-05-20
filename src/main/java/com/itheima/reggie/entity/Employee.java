@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @ApiModel("员工类")
 public class Employee implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")
@@ -41,19 +40,19 @@ public class Employee implements Serializable {
     @ApiModelProperty("售卖状态{0:停售,1:起售}")
     private Integer status;
 
-    @ApiModelProperty("员工信息创建时间")
+    //@ApiModelProperty("员工信息创建时间")
     @TableField(fill = FieldFill.INSERT) //插入时自动填充
     private LocalDateTime createTime;
 
-    @ApiModelProperty("员工信息更新时间")
+    //@ApiModelProperty("员工信息更新时间")
     @TableField(fill = FieldFill.INSERT_UPDATE) //插入和更新时自动填充
     private LocalDateTime updateTime;
 
-    @ApiModelProperty("员工信息创建人")
+    //@ApiModelProperty("员工信息创建人")
     @TableField(fill = FieldFill.INSERT) //插入时自动填充
     private Long createUser;
 
-    @ApiModelProperty("员工信息修改人")
+    //@ApiModelProperty("员工信息修改人")
     @TableField(fill = FieldFill.INSERT_UPDATE) //插入和更新时自动填充
     private Long updateUser;
 

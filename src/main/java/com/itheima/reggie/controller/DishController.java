@@ -51,7 +51,7 @@ public class DishController {
      */
     @GetMapping("/list")
     @ApiOperation(value = "菜品列表接口")
-    @ApiImplicitParam(name = "dish", value = "菜品实体")
+    //@ApiImplicitParam(name = "dish", value = "菜品实体")
     @Cacheable(value = "dishCache", key = "#dish.categoryId + '_' + #dish.status")
     public R<Object> list(Dish dish) {
 
@@ -88,7 +88,7 @@ public class DishController {
      */
     @PostMapping
     @ApiOperation(value = "新增菜品接口")
-    @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
+    //@ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> save(@RequestBody DishDto dishDto) {
 
@@ -104,7 +104,7 @@ public class DishController {
      */
     @PutMapping
     @ApiOperation(value = "菜品修改接口")
-    @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
+    //@ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> update(@RequestBody DishDto dishDto) {
 
@@ -120,7 +120,7 @@ public class DishController {
      */
     @DeleteMapping
     @ApiOperation(value = "菜品删除接口")
-    @ApiImplicitParam(name = "ids", value = "菜品编号列表")
+    //@ApiImplicitParam(name = "ids", value = "菜品编号列表")
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids) {
 
@@ -138,8 +138,8 @@ public class DishController {
     @PostMapping("/status/{status}")
     @ApiOperation(value = "菜品售卖状态修改接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "status", value = "菜品售卖状态", required = true),
-            @ApiImplicitParam(name = "ids", value = "菜品编号列表", required = true)
+            @ApiImplicitParam(name = "ids", value = "菜品编号列表", required = true),
+            @ApiImplicitParam(name = "status", value = "菜品售卖状态", required = true)
     })
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> updateStatus(@RequestParam("ids") List<Long> ids, @PathVariable Integer status) {
@@ -156,7 +156,7 @@ public class DishController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "查询菜品接口")
-    @ApiImplicitParam(name = "id", value = "菜品编号")
+    //@ApiImplicitParam(name = "id", value = "菜品编号")
     public R<DishDto> get(@PathVariable Long id) {
 
         DishDto dishDto = dishService.getByIdDishWithFlavor(id);

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @ApiModel("菜品口味类")
 public class DishFlavor implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")
@@ -35,19 +34,19 @@ public class DishFlavor implements Serializable {
     @ApiModelProperty("菜品口味列表")
     private String value;
 
-    @ApiModelProperty("菜品创建时间")
+    //@ApiModelProperty("菜品创建时间")
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
-    @ApiModelProperty("菜品更新时间")
+    //@ApiModelProperty("菜品更新时间")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
-    @ApiModelProperty("菜品创建人")
+    //@ApiModelProperty("菜品创建人")
     @TableField(fill = FieldFill.INSERT)
     private Long createUser;
 
-    @ApiModelProperty("菜品修改人")
+    //@ApiModelProperty("菜品修改人")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 

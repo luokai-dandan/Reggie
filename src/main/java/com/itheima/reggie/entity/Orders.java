@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @ApiModel("订单类")
 public class Orders implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")

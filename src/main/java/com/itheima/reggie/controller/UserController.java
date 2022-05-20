@@ -72,7 +72,7 @@ public class UserController {
 
     @PostMapping("/loginout")
     @ApiOperation(value = "手机端用户登出接口")
-    @ApiImplicitParam(name = "request", value = "请求对象")
+    //@ApiImplicitParam(name = "request", value = "请求对象")
     public R<String> logout(HttpServletRequest request) {
         userService.Logout(request);
         return R.success("退出成功");

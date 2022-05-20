@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @ApiModel("购物车类")
 public class ShoppingCart implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")

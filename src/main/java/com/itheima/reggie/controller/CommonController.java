@@ -44,7 +44,7 @@ public class CommonController {
      */
     @PostMapping("/upload")
     @ApiOperation(value = "图片上传接口")
-    @ApiImplicitParam(name = "file", value = "文件")
+    //@ApiImplicitParam(name = "file", value = "文件")
     //参数file必须和前端的name一致，否则无法收到参数
     public R<String> upload(MultipartFile file) {
         //file是个临时文件，需要转存到指定位置，否则本次请求完成后文件会删除
