@@ -42,21 +42,23 @@ public class SetmealController {
 
     /**
      * 查询套餐列表
+     *
      * @param setmeal
      * @return
      */
     @GetMapping("/list")
     @ApiOperation(value = "查询套餐列表接口")
     //@ApiImplicitParam(name = "setmeal", value = "套餐列表")
-    @Cacheable(value = "setmealCache",  key = "#setmeal.categoryId + '_' + #setmeal.status")
-    public R<List<Setmeal>> list(Setmeal setmeal){
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
 
         List<Setmeal> setmealList = setmealService.getList(setmeal);
-        return setmealList!=null?R.success(setmealList):R.error("查询错误");
+        return setmealList != null ? R.success(setmealList) : R.error("查询错误");
     }
 
     /**
      * 套餐信息分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -69,14 +71,15 @@ public class SetmealController {
             @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true),
             @ApiImplicitParam(name = "name", value = "套餐名称", required = false)
     })
-    public R<Page<SetmealDto>> page(int page, int pageSize, String name){
+    public R<Page<SetmealDto>> page(int page, int pageSize, String name) {
 
         Page<SetmealDto> setmealDtoPage = setmealService.getPage(page, pageSize, name);
-        return setmealDtoPage!=null?R.success(setmealDtoPage):R.error("查询错误");
+        return setmealDtoPage != null ? R.success(setmealDtoPage) : R.error("查询错误");
     }
 
     /**
      * 新增套餐
+     *
      * @param setmealDto
      * @return
      */
@@ -85,30 +88,32 @@ public class SetmealController {
     //@ApiImplicitParam(name = "setmealDto", value = "套餐包装实体")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
-    public R<String> add(@RequestBody SetmealDto setmealDto){
+    public R<String> add(@RequestBody SetmealDto setmealDto) {
 
         Boolean add = setmealService.addSetmealWithDish(setmealDto);
-        return add?R.success("添加套餐成功"):R.error("添加套餐失败");
+        return add ? R.success("添加套餐成功") : R.error("添加套餐失败");
     }
 
 
     /**
      * 根据id查询套餐信息和对应的菜品信息
+     *
      * @param id
      * @return
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "查询套餐接口")
     //@ApiImplicitParam(name = "id", value = "编号")
-    @Cacheable(value = "setmealCache",key = "#id", unless = "#result == null")
-    public R<SetmealDto> get(@PathVariable Long id){
+    @Cacheable(value = "setmealCache", key = "#id", unless = "#result == null")
+    public R<SetmealDto> get(@PathVariable Long id) {
 
         SetmealDto setmealDto = setmealService.getByIdSetmealWithDish(id);
-        return setmealDto!=null?R.success(setmealDto):R.error("查询错误");
+        return setmealDto != null ? R.success(setmealDto) : R.error("查询错误");
     }
 
     /**
      * 修改菜品
+     *
      * @param setmealDto
      * @return
      */
@@ -117,14 +122,15 @@ public class SetmealController {
     //@ApiImplicitParam(name = "setmealDto", value = "套餐包装类")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
-    public R<String> update(@RequestBody SetmealDto setmealDto){
+    public R<String> update(@RequestBody SetmealDto setmealDto) {
 
         Boolean update = setmealService.updateSetmealWithDish(setmealDto);
-        return update?R.success("修改菜品成功"):R.error("修改菜品失败");
+        return update ? R.success("修改菜品成功") : R.error("修改菜品失败");
     }
 
     /**
      * 删除套餐
+     *
      * @param ids
      * @return
      */
@@ -133,14 +139,15 @@ public class SetmealController {
     //@ApiImplicitParam(name = "ids", value = "编号数组")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
-    public R<String> delete(@RequestParam List<Long> ids){
+    public R<String> delete(@RequestParam List<Long> ids) {
 
         Boolean delete = setmealService.deleteSetmealWithDish(ids);
-        return delete?R.success("菜品删除成功"):R.error("菜品删除失败");
+        return delete ? R.success("菜品删除成功") : R.error("菜品删除失败");
     }
 
     /**
      * 修改套餐状态
+     *
      * @param status
      * @param ids
      * @return
@@ -153,10 +160,10 @@ public class SetmealController {
     })
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)
-    public R<String> updateStatus(@RequestParam("ids") List<Long> ids, @PathVariable Integer status){
+    public R<String> updateStatus(@RequestParam("ids") List<Long> ids, @PathVariable Integer status) {
 
         Boolean update = setmealService.updateStatusByIds(ids, status);
-        return update?R.success("套餐状态修改成功"):R.error("套餐状态修改失败");
+        return update ? R.success("套餐状态修改成功") : R.error("套餐状态修改失败");
     }
 
 }

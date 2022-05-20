@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 /*
-* 通用返回结果，服务端响应的数据最终都会封装成此对象
-* */
+ * 通用返回结果，服务端响应的数据最终都会封装成此对象
+ * */
 
 @Data
 @ApiModel("返回结果")

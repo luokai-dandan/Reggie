@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
 /*
-* 员工实体
-* */
+ * 员工实体
+ * */
 @Data
 @ApiModel("员工类")
 public class Employee implements Serializable {

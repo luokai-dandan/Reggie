@@ -29,11 +29,12 @@ public class ShoppingCartController {
 
     /**
      * 购物车列表
+     *
      * @return
      */
     @GetMapping("/list")
     @ApiOperation(value = "购物车列表接口")
-    public R<List<ShoppingCart>> list(){
+    public R<List<ShoppingCart>> list() {
 
         List<ShoppingCart> shoppingCartList = shoppingCartService.getList();
         return R.success(shoppingCartList);
@@ -41,6 +42,7 @@ public class ShoppingCartController {
 
     /**
      * 购物车加
+     *
      * @param shoppingCart
      * @return
      */
@@ -55,6 +57,7 @@ public class ShoppingCartController {
 
     /**
      * 购物车减
+     *
      * @param shoppingCart
      * @return
      */
@@ -64,16 +67,17 @@ public class ShoppingCartController {
     public R<ShoppingCart> sub(@RequestBody ShoppingCart shoppingCart) {
 
         ShoppingCart shoppingCartOne = shoppingCartService.subDishToSC(shoppingCart);
-        return shoppingCartOne!=null?R.success(shoppingCartOne):R.error("操作失败");
+        return shoppingCartOne != null ? R.success(shoppingCartOne) : R.error("操作失败");
     }
 
     /**
      * 根据用户id删除购物车
+     *
      * @return
      */
     @DeleteMapping("/clean")
     @ApiOperation(value = "清空购物车接口")
-    public R<String> clean(){
+    public R<String> clean() {
 
         shoppingCartService.cleanSC();
         return R.success("清空购物车成功");

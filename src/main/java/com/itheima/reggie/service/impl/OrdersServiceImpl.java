@@ -58,6 +58,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 用户下单
+     *
      * @param orders
      */
     @Override
@@ -75,7 +76,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<ShoppingCart> shoppingCarts = shoppingCartService.list(queryWrapper);
 
         //防止其他方式导致购物车空仍提交数据
-        if (shoppingCarts==null || shoppingCarts.size()==0) {
+        if (shoppingCarts == null || shoppingCarts.size() == 0) {
             throw new CustomException("购物车为空，不能下单");
         }
 
@@ -84,7 +85,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long addressBookId = orders.getAddressBookId();
         AddressBook addressBook = addressBookService.getById(addressBookId);
 
-        if (addressBook==null) {
+        if (addressBook == null) {
             throw new CustomException("地址信息有误，不能下单");
         }
 
@@ -131,8 +132,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderMongo.setOrdersDetail(ordersDetailList);
 
         //kafka发送订单消息
-        String orderKey = "order_"+orderMongo.getId().toString();
-        kafkaTemplate.send(TOPIC_NAME,0, orderKey, orderMongo);
+        String orderKey = "order_" + orderMongo.getId().toString();
+        kafkaTemplate.send(TOPIC_NAME, 0, orderKey, orderMongo);
 
         //向订单表插入数据，一条数据
         this.save(orders);
@@ -146,6 +147,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 手机端通过mongodb查看订单信息
+     *
      * @param page
      * @param pageSize
      * @return
@@ -163,7 +165,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         List<OrdersDto> orderDtoList = new ArrayList<>();
 
-        for(Order order: orderList){
+        for (Order order : orderList) {
             LambdaQueryWrapper<OrdersDetail> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(OrdersDetail::getOrderId, order.getId());
             List<OrdersDetail> ordersDetailList = ordersDetailService.list(queryWrapper);
@@ -188,6 +190,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * mongo分页查询订单信息（管理端）
+     *
      * @param queryPageDate
      * @return
      */
@@ -213,6 +216,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 修改订单状态
+     *
      * @param orders
      * @return
      */
@@ -233,6 +237,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 再来一单
+     *
      * @param map
      */
     @Override
@@ -244,7 +249,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long userId = BaseContext.getCurrentId();
 
         LambdaQueryWrapper<OrdersDetail> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(OrdersDetail::getOrderId,id);
+        queryWrapper.eq(OrdersDetail::getOrderId, id);
         //获取该订单对应的所有的订单明细表
         List<OrdersDetail> orderDetailList = ordersDetailService.list(queryWrapper);
 

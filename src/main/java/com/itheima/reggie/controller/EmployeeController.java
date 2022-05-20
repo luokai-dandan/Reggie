@@ -19,7 +19,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
@@ -45,7 +47,7 @@ public class EmployeeController {
             @ApiImplicitParam(name = "request", value = "请求对象", required = true),
             @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
     })
-    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee) {
+    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee, HttpServletResponse response) {
 
         //1、将页面提交的密码password进行md5加密处理
         String password = employee.getPassword();
@@ -69,8 +71,8 @@ public class EmployeeController {
             return R.error("账号已过期，请重新登录");
         }
 
-        //6、登录成功，将员工id存入Session并返回登录成功结果
-        request.getSession().setAttribute("employee", user.getId());
+        //登陆系统
+        employeeService.login(user, request, response);
 
         return R.success(user);
     }
@@ -84,9 +86,9 @@ public class EmployeeController {
     @PostMapping("/logout")
     @ApiOperation(value = "管理端员工登出接口")
     //@ApiImplicitParam(name = "request", value = "请求对象")
-    public R<String> logout(HttpServletRequest request) {
+    public R<String> logout(HttpServletRequest request, HttpServletResponse response) {
 
-        Boolean logout = employeeService.logout(request);
+        Boolean logout = employeeService.logout(request, response);
 
         return logout ? R.success("退出成功") : R.error("退出失败");
     }

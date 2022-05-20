@@ -14,6 +14,7 @@ public interface OrdersService extends IService<Orders> {
 
     /**
      * 用户下单
+     *
      * @param order
      */
     public void submitOrders(Orders order);
@@ -21,6 +22,7 @@ public interface OrdersService extends IService<Orders> {
 
     /**
      * 手机端通过mongodb查看订单信息
+     *
      * @param page
      * @param pageSize
      * @return
@@ -29,6 +31,7 @@ public interface OrdersService extends IService<Orders> {
 
     /**
      * mongo分页查询订单信息（管理端）
+     *
      * @param queryPageDate
      * @return
      */
@@ -36,6 +39,7 @@ public interface OrdersService extends IService<Orders> {
 
     /**
      * 修改订单状态
+     *
      * @param orders
      * @return
      */
@@ -43,7 +47,8 @@ public interface OrdersService extends IService<Orders> {
 
     /**
      * 再来一单
+     *
      * @param map
      */
-    public void againOrders(Map<String,String> map);
+    public void againOrders(Map<String, String> map);
 }

@@ -38,7 +38,7 @@ public class AddressBookController {
     public R<List<AddressBook>> list(AddressBook addressBook) {
 
         List<AddressBook> addressBookList = addressBookService.getList(addressBook);
-        return addressBookList!=null?R.success(addressBookList):R.error("查询错误");
+        return addressBookList != null ? R.success(addressBookList) : R.error("查询错误");
     }
 
     /**
@@ -54,7 +54,7 @@ public class AddressBookController {
     public R<AddressBook> add(@RequestBody AddressBook addressBook) {
 
         AddressBook addAddr = addressBookService.addAddr(addressBook);
-        return addAddr!=null?R.success(addAddr):R.error("查询错误");
+        return addAddr != null ? R.success(addAddr) : R.error("查询错误");
     }
 
     /**
@@ -84,7 +84,7 @@ public class AddressBookController {
     public R<AddressBook> setDefault(@RequestBody AddressBook addressBook) {
 
         AddressBook setDefaultAddr = addressBookService.setDefaultAddr(addressBook);
-        return setDefaultAddr!=null?R.success(setDefaultAddr):R.error("查询错误");
+        return setDefaultAddr != null ? R.success(setDefaultAddr) : R.error("查询错误");
     }
 
     /**

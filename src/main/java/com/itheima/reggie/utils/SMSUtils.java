@@ -22,19 +22,19 @@ public class SMSUtils {
      * {1} -> 【瑞吉外卖】
      * {2} -> 123456
      * {3} -> 5
-     * @param secretId "AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL"
-     * @param secretKey "c5OfwFZoHZlssjZJxhIgu7Nf2SsLuMn6"
-     * @param connTimeout 60
-     * @param sdkAppId "1400677800"
-     * @param signName "蛋蛋编程"
-     * @param templateId "1401550"
+     *
+     * @param secretId         "AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL"
+     * @param secretKey        "c5OfwFZoHZlssjZJxhIgu7Nf2SsLuMn6"
+     * @param connTimeout      60
+     * @param sdkAppId         "1400677800"
+     * @param signName         "蛋蛋编程"
+     * @param templateId       "1401550"
      * @param templateParamSet {"【瑞吉外卖】","123456","5"}
-     * @param phoneNumberSet 手机号列表{"+8618322280259"}
+     * @param phoneNumberSet   手机号列表{"+8618322280259"}
      */
     public static void sendMessage(String secretId, String secretKey, String connTimeout,
                                    String sdkAppId, String signName, String templateId,
-                                   String[] templateParamSet, String[] phoneNumberSet)
-    {
+                                   String[] templateParamSet, String[] phoneNumberSet) {
         try {
             /* 必要步骤：
              * 实例化一个认证对象，入参需要传入腾讯云账户密钥对secretId，secretKey。
@@ -51,7 +51,7 @@ public class SMSUtils {
             httpProfile.setReqMethod("POST");
             /* SDK有默认的超时时间，非必要请不要进行调整
              * 如有需要请在代码中查阅以获取最新的默认值 */
-            httpProfile.setConnTimeout(Integer.parseInt(connTimeout)*60);
+            httpProfile.setConnTimeout(Integer.parseInt(connTimeout) * 60);
             /* 指定接入地域域名，默认就近地域接入域名为 sms.tencentcloudapi.com ，也支持指定地域域名访问，例如广州地域的域名为 sms.ap-guangzhou.tencentcloudapi.com */
             httpProfile.setEndpoint("sms.tencentcloudapi.com");
 
@@ -64,7 +64,7 @@ public class SMSUtils {
             clientProfile.setHttpProfile(httpProfile);
             /* 实例化要请求产品(以sms为例)的client对象
              * 第二个参数是地域信息，可以直接填写字符串ap-guangzhou，支持的地域列表参考 https://cloud.tencent.com/document/api/382/52071#.E5.9C.B0.E5.9F.9F.E5.88.97.E8.A1.A8 */
-            SmsClient client = new SmsClient(cred, "ap-guangzhou",clientProfile);
+            SmsClient client = new SmsClient(cred, "ap-guangzhou", clientProfile);
             /* 实例化一个请求对象，根据调用的接口和实际情况，可以进一步设置请求参数
              * 你可以直接查询SDK源码确定接口有哪些属性可以设置
              * 属性可能是基本类型，也可能引用了另一个数据结构

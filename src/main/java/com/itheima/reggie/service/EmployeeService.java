@@ -6,6 +6,7 @@ import com.itheima.reggie.entity.Employee;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public interface EmployeeService extends IService<Employee> {
 
@@ -18,12 +19,21 @@ public interface EmployeeService extends IService<Employee> {
     public Employee queryUser(Employee employee);
 
     /**
+     * 登录系统
+     *
+     * @param employee
+     * @param response
+     * @return
+     */
+    public void login(Employee employee, HttpServletRequest request, HttpServletResponse response);
+
+    /**
      * 退出登录
      *
      * @param request
      * @return
      */
-    public Boolean logout(HttpServletRequest request);
+    public Boolean logout(HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 员工信息分页查询

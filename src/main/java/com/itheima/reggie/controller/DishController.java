@@ -77,7 +77,7 @@ public class DishController {
     public R<Page<DishDto>> page(int page, int pageSize, String name) {
 
         Page<DishDto> dishDtoPage = dishService.getPage(page, pageSize, name);
-        return dishDtoPage!=null?R.success(dishDtoPage):R.error("查询错误");
+        return dishDtoPage != null ? R.success(dishDtoPage) : R.error("查询错误");
     }
 
     /**
@@ -160,7 +160,7 @@ public class DishController {
     public R<DishDto> get(@PathVariable Long id) {
 
         DishDto dishDto = dishService.getByIdDishWithFlavor(id);
-        return dishDto!=null?R.success(dishDto):R.error("查询错误");
+        return dishDto != null ? R.success(dishDto) : R.error("查询错误");
     }
 
 }

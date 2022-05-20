@@ -21,12 +21,12 @@ import java.util.List;
 //@Document(collection="mongodb 对应 collection 名")
 // 若未加 @Document ，该 bean save 到 mongo 的 order collection
 // 若添加 @Document ，则 save 到 order collection
-@Document(collection="order")//可以省略，如果省略，则默认使用类名小写映射集合
+@Document(collection = "order")//可以省略，如果省略，则默认使用类名小写映射集合
 //复合索引
 // @CompoundIndex( def = "{'userid': 1, 'nickname': -1}")
 @Data
 //@ApiModel("MongoDB订单实体")
-public class Order implements Serializable{
+public class Order implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

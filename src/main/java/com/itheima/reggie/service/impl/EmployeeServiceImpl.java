@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 @Service
@@ -40,10 +42,37 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     }
 
     @Override
-    public Boolean logout(HttpServletRequest request) {
+    public void login(Employee employee, HttpServletRequest request, HttpServletResponse response) {
+
+        //6、登录成功，将员工id存入Session并返回登录成功结果
+        request.getSession().setAttribute("employee", employee.getId());
+
+        //写入cookie
+        Cookie cookieUserId = new Cookie("loginUser", employee.getId().toString());
+        cookieUserId.setMaxAge(10 * 24 * 60 * 60);
+        response.addCookie(cookieUserId);
+
+        Cookie cookieCode = new Cookie("loginPwd", employee.getPassword());
+        cookieCode.setMaxAge(10 * 24 * 60 * 60);
+        response.addCookie(cookieCode);
+
+    }
+
+    @Override
+    public Boolean logout(HttpServletRequest request, HttpServletResponse response) {
 
         //清理Session中保存的当前登陆员工的id
         request.getSession().removeAttribute("employee");
+
+        //写入cookie
+        Cookie cookieUserId = new Cookie("loginUser", "");
+        cookieUserId.setMaxAge(0);
+        response.addCookie(cookieUserId);
+
+        Cookie cookieCode = new Cookie("loginPwd", "");
+        cookieCode.setMaxAge(0);
+        response.addCookie(cookieCode);
+
         return true;
     }
 

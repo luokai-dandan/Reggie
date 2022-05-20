@@ -41,6 +41,7 @@ public class OrdersController {
 
     /**
      * 提交订单
+     *
      * @param orders
      * @return
      */
@@ -79,6 +80,7 @@ public class OrdersController {
 
     /**
      * 手机端通过mongodb查看订单信息
+     *
      * @param page
      * @param pageSize
      * @return
@@ -141,6 +143,7 @@ public class OrdersController {
 
     /**
      * mongo分页查询订单信息（管理端）
+     *
      * @param queryPageDate
      * @return
      */
@@ -156,13 +159,14 @@ public class OrdersController {
 
     /**
      * 修改订单状态
+     *
      * @param orders
      * @return
      */
     @PutMapping
     @ApiOperation(value = "订单状态修改接口")
     //@ApiImplicitParam(name = "orders", value = "订单实体")
-    public R<String> status(@RequestBody Orders orders){
+    public R<String> status(@RequestBody Orders orders) {
 
         ordersService.updateOrdersStatus(orders);
         return R.success("状态修改成功");
@@ -170,13 +174,14 @@ public class OrdersController {
 
     /**
      * 再来一单
+     *
      * @param map
      * @return
      */
     @PostMapping("/again")
     @ApiOperation(value = "再来一单接口")
     //@ApiImplicitParam(name = "map", value = "订单实体")
-    public R<String> again(@RequestBody Map<String,String> map){
+    public R<String> again(@RequestBody Map<String, String> map) {
 
         ordersService.againOrders(map);
         return R.success("操作成功");
