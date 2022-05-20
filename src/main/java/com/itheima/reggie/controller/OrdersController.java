@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,37 +39,17 @@ public class OrdersController {
     @Autowired
     private OrdersService ordersService;
 
-    //注入mongodb
-    @Autowired
-    private com.itheima.reggie.mongo.service.OrderService orderService;
-
-    @Autowired
-    private OrdersDetailService ordersDetailService;
-
-    @Autowired
-    private RedisTemplate redisTemplate;
-
-    @Autowired
-    private ShoppingCartService shoppingCartService;
-
-
     /**
      * 提交订单
-     * @param order
+     * @param orders
      * @return
      */
     @PostMapping("/submit")
     @ApiOperation(value = "订单提交接口")
     @ApiImplicitParam(name = "order", value = "订单实体")
-    public R<String> submit(@RequestBody Orders order) {
+    public R<String> submit(@RequestBody Orders orders) {
 
-        ordersService.submit(order);
-//        log.info("订单数据：{}", order);
-
-        //清理所有菜品的缓存数据
-        Set keys = redisTemplate.keys("shoppingCart_*");
-        redisTemplate.delete(keys);
-
+        ordersService.submitOrders(orders);
         return R.success("订单提交成功，待派送");
     }
 
@@ -97,7 +78,7 @@ public class OrdersController {
 //    }
 
     /**
-     * 客户端通过mongodb查看订单信息
+     * 手机端通过mongodb查看订单信息
      * @param page
      * @param pageSize
      * @return
@@ -109,20 +90,9 @@ public class OrdersController {
             @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true)
     })
     public R<Page<OrdersDto>> userPage(int page, int pageSize) {
-//        log.info("page = {}, pageSize = {}", page, pageSize);
 
-        QueryPageDate queryPageDate = new QueryPageDate();
-        queryPageDate.setPageAndPageSize(page, pageSize);
 
-        List<OrdersDto> orderDtoList = ordersService.getOrdersAndDetail(queryPageDate);
-
-        Page<OrdersDto> ordersDtoPage = new Page<>(page, pageSize);
-        ordersDtoPage.setRecords(orderDtoList);
-        ordersDtoPage.setTotal(orderDtoList.size());
-//        ordersDtoPage.setOptimizeCountSql(true);
-//        ordersDtoPage.setSearchCount(true);
-//        ordersDtoPage.setHitCount(false);
-
+        Page<OrdersDto> ordersDtoPage = ordersService.getUserPage(page, pageSize);
 
         return R.success(ordersDtoPage);
     }
@@ -178,96 +148,38 @@ public class OrdersController {
     @ApiOperation(value = "管理端订单分页查询接口")
     @ApiImplicitParam(name = "queryPageDate", value = "分页查询实体")
     public R<Page<Order>> page(QueryPageDate queryPageDate) {
-        List<Order> pageList = orderService.getPageList(queryPageDate);
 
-        Page<Order> orderPage = new Page<>();
-
-        orderPage.setRecords(pageList);
-
-        //设置orderPage传给前端的总条数为pageList.size()
-        //补全参数
-        orderPage.setTotal(pageList.size());
-        orderPage.setSize(queryPageDate.getPageSize());
-        orderPage.setCurrent(queryPageDate.getPage());
-        orderPage.setOptimizeCountSql(true);
-        orderPage.setSearchCount(true);
-        orderPage.setHitCount(false);
-
+        Page<Order> orderPage = ordersService.getPage(queryPageDate);
         return R.success(orderPage);
     }
 
 
     /**
      * 修改订单状态
-     * @param order
+     * @param orders
      * @return
      */
     @PutMapping
     @ApiOperation(value = "订单状态修改接口")
     @ApiImplicitParam(name = "order", value = "订单实体")
-    public R<String> status(@RequestBody Orders order){
+    public R<String> status(@RequestBody Orders orders){
 
-//        log.info("order: {}", order);
-        //更新数据库（使用mysql）
-        ordersService.updateById(order);
-
-        //将封端好的orders复制到mongodb的orders中
-        Order orderMongo = new Order();
-        BeanUtils.copyProperties(order, orderMongo);
-
-        //在mongodb中更新status
-        orderService.updateOrderStatus(orderMongo);
-
+        ordersService.updateOrdersStatus(orders);
         return R.success("状态修改成功");
     }
 
+    /**
+     * 再来一单
+     * @param map
+     * @return
+     */
     @PostMapping("/again")
+    @ApiOperation(value = "再来一单接口")
+    @ApiImplicitParam(name = "map", value = "订单实体")
     public R<String> again(@RequestBody Map<String,String> map){
-        String ids = map.get("id");
 
-        long id = Long.parseLong(ids);
-
-        LambdaQueryWrapper<OrdersDetail> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(OrdersDetail::getOrderId,id);
-        //获取该订单对应的所有的订单明细表
-        List<OrdersDetail> orderDetailList = ordersDetailService.list(queryWrapper);
-
-        //通过用户id把原来的购物车给清空，这里的clean方法是视频中讲过的,建议抽取到service中,那么这里就可以直接调用了
-        Long userId = BaseContext.getCurrentId();
-        LambdaQueryWrapper<ShoppingCart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(ShoppingCart::getUserId, userId);
-        shoppingCartService.remove(lambdaQueryWrapper);
-        //清理所有菜品的缓存数据
-        Set keys = redisTemplate.keys("shoppingCart_*");
-        redisTemplate.delete(keys);
-
-        //获取用户id
-        List<ShoppingCart> shoppingCartList = orderDetailList.stream().map((item) -> {
-            //把从order表中和order_details表中获取到的数据赋值给这个购物车对象
-            ShoppingCart shoppingCart = new ShoppingCart();
-            shoppingCart.setUserId(userId);
-            shoppingCart.setImage(item.getImage());
-            Long dishId = item.getDishId();
-            Long setmealId = item.getSetmealId();
-            if (dishId != null) {
-                //如果是菜品那就添加菜品的查询条件
-                shoppingCart.setDishId(dishId);
-            } else {
-                //添加到购物车的是套餐
-                shoppingCart.setSetmealId(setmealId);
-            }
-            shoppingCart.setName(item.getName());
-            shoppingCart.setDishFlavor(item.getDishFlavor());
-            shoppingCart.setNumber(item.getNumber());
-            shoppingCart.setAmount(item.getAmount());
-            shoppingCart.setCreateTime(LocalDateTime.now());
-            return shoppingCart;
-        }).collect(Collectors.toList());
-
-        //把携带数据的购物车批量插入购物车表  这个批量保存的方法要使用熟练！！！
-        shoppingCartService.saveBatch(shoppingCartList);
-
+        ordersService.againOrders(map);
         return R.success("操作成功");
-
     }
+
 }

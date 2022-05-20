@@ -179,11 +179,17 @@
         },
         methods: {
           logout() {
-            logoutApi().then((res)=>{
-              if(res.code === 1){
-                localStorage.removeItem('userInfo')
-                window.location.href = '/backend/page/login/login.html'
-              }
+            this.$confirm('确认退出登录?', '提示', {
+              'confirmButtonText': '确定',
+              'cancelButtonText': '取消',
+              'type': 'warning'
+            }).then(() => {
+              logoutApi().then((res)=>{
+                if(res.code === 1){
+                  localStorage.removeItem('userInfo')
+                  window.location.href = '/backend/page/login/login.html'
+                }
+              })
             })
           },
           goBack() {

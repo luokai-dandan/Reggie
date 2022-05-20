@@ -124,7 +124,7 @@ custom-parameters:
   # 短信验证码
   send-msg:
     # 是否启用
-    is-enable: false
+    enable: false
     # 腾讯云账户密钥对Id
     secret-id: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
     # 腾讯云账户密钥对Key

@@ -12,8 +12,4 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/orderDetail")
 @Api(tags = "订单详情接口")
 public class OrdersDetailController {
-
-    @Autowired
-    private OrdersDetailService ordersDetailService;
-
 }

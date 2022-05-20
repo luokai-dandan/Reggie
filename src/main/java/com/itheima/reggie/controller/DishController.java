@@ -43,12 +43,6 @@ public class DishController {
     @Autowired
     private DishService dishService;
 
-    @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
-    private RedisTemplate redisTemplate;
-
     /**
      * 根据条件查询对应的菜品数据及分类信息和移动端的口味数据
      *
@@ -58,10 +52,11 @@ public class DishController {
     @GetMapping("/list")
     @ApiOperation(value = "菜品列表接口")
     @ApiImplicitParam(name = "dish", value = "菜品实体")
+    @Cacheable(value = "dishCache", key = "#dish.categoryId + '_' + #dish.status")
     public R<Object> list(Dish dish) {
 
         List<DishDto> dishDtoList = dishService.getList(dish);
-        return dishDtoList != null ? R.success(dishDtoList) : R.success("查询失败");
+        return dishDtoList != null ? R.success(dishDtoList) : R.error("查询失败");
     }
 
     /**
@@ -82,7 +77,7 @@ public class DishController {
     public R<Page<DishDto>> page(int page, int pageSize, String name) {
 
         Page<DishDto> dishDtoPage = dishService.getPage(page, pageSize, name);
-        return R.success(dishDtoPage);
+        return dishDtoPage!=null?R.success(dishDtoPage):R.error("查询错误");
     }
 
     /**
@@ -94,10 +89,11 @@ public class DishController {
     @PostMapping
     @ApiOperation(value = "新增菜品接口")
     @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> save(@RequestBody DishDto dishDto) {
 
         Boolean addDishWithFlavor = dishService.addDishWithFlavor(dishDto);
-        return addDishWithFlavor ? R.success("添加菜品成功") : R.success("添加菜品失败");
+        return addDishWithFlavor ? R.success("添加菜品成功") : R.error("添加菜品失败");
     }
 
     /**
@@ -109,10 +105,11 @@ public class DishController {
     @PutMapping
     @ApiOperation(value = "菜品修改接口")
     @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> update(@RequestBody DishDto dishDto) {
 
         Boolean update = dishService.updateDishWithFlavor(dishDto);
-        return update ? R.success("修改菜品成功") : R.success("修改菜品失败");
+        return update ? R.success("修改菜品成功") : R.error("修改菜品失败");
     }
 
     /**
@@ -124,10 +121,11 @@ public class DishController {
     @DeleteMapping
     @ApiOperation(value = "菜品删除接口")
     @ApiImplicitParam(name = "ids", value = "菜品编号列表")
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids) {
 
         Boolean delete = dishService.deleteDishWithFlavor(ids);
-        return delete ? R.success("菜品删除成功") : R.success("菜品删除成功");
+        return delete ? R.success("菜品删除成功") : R.error("菜品删除成功");
     }
 
     /**
@@ -143,10 +141,11 @@ public class DishController {
             @ApiImplicitParam(name = "status", value = "菜品售卖状态", required = true),
             @ApiImplicitParam(name = "ids", value = "菜品编号列表", required = true)
     })
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> updateStatus(@RequestParam("ids") List<Long> ids, @PathVariable Integer status) {
 
         Boolean updateDishStatus = dishService.updateDishStatus(ids, status);
-        return updateDishStatus ? R.success("菜品状态修改成功") : R.success("菜品状态修改失败");
+        return updateDishStatus ? R.success("菜品状态修改成功") : R.error("菜品状态修改失败");
     }
 
     /**
@@ -161,7 +160,7 @@ public class DishController {
     public R<DishDto> get(@PathVariable Long id) {
 
         DishDto dishDto = dishService.getByIdDishWithFlavor(id);
-        return R.success(dishDto);
+        return dishDto!=null?R.success(dishDto):R.error("查询错误");
     }
 
 }

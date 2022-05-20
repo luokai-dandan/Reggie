@@ -37,8 +37,8 @@ public class AddressBookController {
     @Cacheable(value = "addressBookCache", key = "#addressBook.id + '_' + #addressBook.userId")
     public R<List<AddressBook>> list(AddressBook addressBook) {
 
-        List<AddressBook> list = addressBookService.getList(addressBook);
-        return R.success(list);
+        List<AddressBook> addressBookList = addressBookService.getList(addressBook);
+        return addressBookList!=null?R.success(addressBookList):R.error("查询错误");
     }
 
     /**
@@ -54,7 +54,7 @@ public class AddressBookController {
     public R<AddressBook> add(@RequestBody AddressBook addressBook) {
 
         AddressBook addAddr = addressBookService.addAddr(addressBook);
-        return R.success(addAddr);
+        return addAddr!=null?R.success(addAddr):R.error("查询错误");
     }
 
     /**
@@ -84,7 +84,7 @@ public class AddressBookController {
     public R<AddressBook> setDefault(@RequestBody AddressBook addressBook) {
 
         AddressBook setDefaultAddr = addressBookService.setDefaultAddr(addressBook);
-        return R.success(setDefaultAddr);
+        return setDefaultAddr!=null?R.success(setDefaultAddr):R.error("查询错误");
     }
 
     /**
@@ -94,10 +94,10 @@ public class AddressBookController {
     @ApiOperation(value = "地址查询接口")
     @ApiImplicitParam(name = "id", value = "地址编号")
     @Cacheable(value = "addressBookCache", key = "#id", unless = "#result == null")
-    public R<Object> get(@PathVariable Long id) {
+    public R<AddressBook> get(@PathVariable Long id) {
 
-        AddressBook addrById = addressBookService.getById(id);
-        return addrById != null ? R.success(addrById) : R.error("没有找到该对象");
+        AddressBook addressBook = addressBookService.getById(id);
+        return addressBook != null ? R.success(addressBook) : R.error("查询错误");
     }
 
     /**
@@ -107,8 +107,8 @@ public class AddressBookController {
     @ApiOperation(value = "获取默认地址接口")
     public R<AddressBook> getDefault() {
 
-        AddressBook getAddrDef = addressBookService.getAddrDefault();
-        return getAddrDef != null ? R.success(getAddrDef) : R.error("没有找到该对象");
+        AddressBook addressBook = addressBookService.getAddrDefault();
+        return addressBook != null ? R.success(addressBook) : R.error("查询错误");
 
     }
 

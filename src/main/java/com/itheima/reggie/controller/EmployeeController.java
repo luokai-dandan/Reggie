@@ -88,12 +88,11 @@ public class EmployeeController {
 
         Boolean logout = employeeService.logout(request);
 
-        return logout ? R.success("退出成功") : R.success("退出失败");
+        return logout ? R.success("退出成功") : R.error("退出失败");
     }
 
     /**
      * 员工信息分页查询
-     * url：http://127.0.0.1:8080/employee/page?page=1&pageSize=10&name=123
      *
      * @param page
      * @param pageSize
@@ -110,7 +109,7 @@ public class EmployeeController {
     public R<Page<Employee>> page(int page, int pageSize, String name) {
 
         Page<Employee> employeePage = employeeService.getPage(page, pageSize, name);
-        return employeePage != null ? R.success(employeePage) : R.success(null);
+        return employeePage != null ? R.success(employeePage) : R.error("查询错误");
     }
 
     /**
@@ -125,7 +124,7 @@ public class EmployeeController {
     public R<String> save(@RequestBody Employee employee) {
 
         Boolean addEmployee = employeeService.addEmployee(employee);
-        return addEmployee ? R.success("新增员工成功") : R.success("新增员工失败");
+        return addEmployee ? R.success("新增员工成功") : R.error("新增员工失败");
     }
 
     /**
@@ -140,7 +139,7 @@ public class EmployeeController {
     public R<String> update(@RequestBody Employee employee) {
 
         Boolean update = employeeService.updateEmployee(employee);
-        return update ? R.success("员工信息修改成功") : R.success("员工信息修改失败");
+        return update ? R.success("员工信息修改成功") : R.error("员工信息修改失败");
     }
 
     /**
@@ -155,6 +154,6 @@ public class EmployeeController {
     public R<Employee> getById(@PathVariable Long id) {
 
         Employee employee = employeeService.getEmployeeById(id);
-        return employee != null ? R.success(employee) : R.success(null);
+        return employee != null ? R.success(employee) : R.error("查询错误");
     }
 }

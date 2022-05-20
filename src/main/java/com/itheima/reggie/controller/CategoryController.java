@@ -1,6 +1,5 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
@@ -43,7 +42,7 @@ public class CategoryController {
     public R<List<Category>> list(Category category) {
 
         List<Category> categoryList = categoryService.getList(category);
-        return R.success(categoryList);
+        return categoryList != null ? R.success(categoryList) : R.error("查询错误");
     }
 
     /**
@@ -62,7 +61,7 @@ public class CategoryController {
     public R<Page<Category>> page(int page, int pageSize) {
 
         Page<Category> categoryPage = categoryService.getPage(page, pageSize);
-        return R.success(categoryPage);
+        return categoryPage != null ? R.success(categoryPage) : R.error("查询错误");
     }
 
     /**
@@ -78,7 +77,7 @@ public class CategoryController {
     public R<String> add(@RequestBody Category category) {
 
         Boolean addCategory = categoryService.addCategory(category);
-        return addCategory != null ? R.success("新增分类成功") : R.success("新增分类失败");
+        return addCategory != null ? R.success("新增分类成功") : R.error("新增分类失败");
     }
 
     /**
@@ -94,7 +93,7 @@ public class CategoryController {
     public R<String> update(@RequestBody Category category) {
 
         Boolean update = categoryService.updateCategory(category);
-        return update ? R.success("分类信息修改成功") : R.success("分类信息修改失败");
+        return update ? R.success("分类信息修改成功") : R.error("分类信息修改失败");
     }
 
     /**
@@ -111,7 +110,7 @@ public class CategoryController {
 
         //log.info("删除分类，id为：{}", ids);
         Boolean delete = categoryService.deleteCategoryById(ids);
-        return delete ? R.success("分类信息删除成功") : R.success("分类信息删除失败");
+        return delete ? R.success("分类信息删除成功") : R.error("分类信息删除失败");
     }
 
 }

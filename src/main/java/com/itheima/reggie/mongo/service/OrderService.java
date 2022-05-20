@@ -101,22 +101,20 @@ public class OrderService {
         int pageSize = queryPageDate.getPageSize();
         String number = queryPageDate.getNumber();
 
-//        log.info("beginTime: {}", queryPageDate.getBeginTime());
-//        log.info("endTime: {}", queryPageDate.getEndTime());
+        //log.info("beginTime: {}", queryPageDate.getBeginTime());
+        //log.info("endTime: {}", queryPageDate.getEndTime());
 
         if (number != null) {
             criteria.and("number").is(number);
         }
 
         if (queryPageDate.getBeginTime()!=null && queryPageDate.getEndTime()!=null) {
-
             //Date
             Date beginTime = queryPageDate.getBeginTime();
             Date endTime = queryPageDate.getEndTime();
 
             criteria.andOperator(Criteria.where("orderTime").lte(endTime),
                                  Criteria.where("orderTime").gte(beginTime));
-
         }
 
         query.addCriteria(criteria);
@@ -143,7 +141,6 @@ public class OrderService {
 
         //查询条件
         Query query = Query.query(Criteria.where("_id").is(order.getId()));
-
         //更新条件
         Update update = new Update();
         update.set("status", order.getStatus());

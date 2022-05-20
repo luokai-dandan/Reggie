@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +40,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Autowired
     private DishService dishService;
 
-    @Resource
-    private RedisTemplate<String, List<DishDto>> redisTemplate;
+    //@Resource
+    //private RedisTemplate<String, List<DishDto>> redisTemplate;
 
     /**
      * 根据条件查询对应的菜品数据及分类信息和移动端的口味数据
@@ -50,17 +52,16 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Override
     public List<DishDto> getList(Dish dish) {
 
-        List<DishDto> dishDtoList = null;
         //动态构造key
-        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus(); //dish_1397844263642378242_1
+        //String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus(); //dish_1397844263642378242_1
 
         //先从redis中获取缓存数据
-        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+        //dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
         //如果存在，直接返回，无需查询数据库
-        if (dishDtoList != null) {
-            //如果存在，直接返回，无需查询数据库
-            return dishDtoList;
-        }
+        //if (dishDtoList != null) {
+        //    //如果存在，直接返回，无需查询数据库
+        //    return dishDtoList;
+        //}
 
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -72,7 +73,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         List<Dish> list = dishService.list(queryWrapper);
 
-        dishDtoList = list.stream().map((item) -> {
+        List<DishDto> dishDtoList = list.stream().map((item) -> {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);
 
@@ -97,7 +98,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         }).collect(Collectors.toList());
 
         //如果不存在，需要查询数据库，将查询到的菜品数据缓存到Redis
-        redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
+        //redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
 
         return dishDtoList;
     }
@@ -186,8 +187,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //redisTemplate.delete(keys);
 
         //精确清理某个分类下面的菜品缓存
-        String key = "dish_" + dishDto.getCategoryId() + "_1";
-        redisTemplate.delete(key);
+        //String key = "dish_" + dishDto.getCategoryId() + "_1";
+        //redisTemplate.delete(key);
 
         return addDish && addFlavor;
     }
@@ -215,9 +216,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //添加当前提交过来的口味数据--dish_flavor表的insert操作
         List<DishFlavor> flavors = dishDto.getFlavors();
 
-        flavors = flavors.stream().map((item) -> {
+        flavors = flavors.stream().peek((item) -> {
             item.setDishId(dishDto.getId());
-            return item;
         }).collect(Collectors.toList());
 
         boolean updateFlavor = dishFlavorService.saveBatch(flavors);
@@ -227,8 +227,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //redisTemplate.delete(keys);
 
         //精确清理某个分类下面的菜品缓存
-        String key = "dish_" + dishDto.getCategoryId() + "_1";
-        redisTemplate.delete(key);
+        //String key = "dish_" + dishDto.getCategoryId() + "_1";
+        //redisTemplate.delete(key);
 
         return updateDish && updateFlavor;
     }
@@ -256,8 +256,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         //可以删除
         //查询ids的所有dish获得分类id以便redis删除菜品对应的分类缓存
-        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
-        List<Dish> dishList = dishService.list(wrapper);
+        //LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+        //List<Dish> dishList = dishService.list(wrapper);
 
         //如果可以删除，先删除套餐表中的数据--dish
         boolean deleteDish = this.removeByIds(ids);
@@ -274,11 +274,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //redisTemplate.delete(keys);
 
         //精确清理某个分类下面的菜品缓存
-        for (Dish dish : dishList) {
-            String key = "dish_" + dish.getCategoryId() + "_1";
-            redisTemplate.delete(key);
-        }
-
+        //for (Dish dish : dishList) {
+        //    String key = "dish_" + dish.getCategoryId() + "_1";
+        //    redisTemplate.delete(key);
+        //}
         return deleteDish && deleteFlavor;
     }
 
@@ -304,7 +303,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dish.setStatus(status);
             dishList.add(dish);
         }
-
         return dishService.updateBatchById(dishList);
     }
 
@@ -323,15 +321,15 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         Dish dish = this.getById(id);
 
         //动态构造key
-        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus(); //dish_1397844263642378242_1
+        //String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus(); //dish_1397844263642378242_1
 
         //先从redis中获取缓存数据
-        List<DishDto> dishDtoList = redisTemplate.opsForValue().get(key);
+        //List<DishDto> dishDtoList = redisTemplate.opsForValue().get(key);
         //如果存在，直接返回，无需查询数据库
-        if (dishDtoList != null) {
-            //如果存在，直接返回，无需查询数据库，要能查出来，只能是一条数据
-            return dishDtoList.get(0);
-        }
+        //if (dishDtoList != null) {
+        //    //如果存在，直接返回，无需查询数据库，要能查出来，只能是一条数据
+        //    return dishDtoList.get(0);
+        //}
 
         //返回前端需要的类
         DishDto dishDto = new DishDto();
