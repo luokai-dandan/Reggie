@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,13 +52,13 @@ public class SetmealController {
      * @return
      */
     @PostMapping
-    //删除setmealCache分类下的所有缓存数据
-    @CacheEvict(value = "setmealCache", allEntries = true)
     @ApiOperation(value = "新增套餐接口")
     @ApiImplicitParam(name = "setmealDto", value = "套餐包装实体")
+    //删除setmealCache分类下的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> save(@RequestBody SetmealDto setmealDto){
 
-        log.info("dishDto: {}",setmealDto);
+//        log.info("dishDto: {}",setmealDto);
 
         setmealService.saveWithDish(setmealDto);
         return R.success("添加套餐成功");
@@ -78,7 +79,7 @@ public class SetmealController {
             @ApiImplicitParam(name = "name", value = "套餐名称", required = false)
     })
     public R<Page<SetmealDto>> page(int page, int pageSize, String name){
-        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
+//        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
 
         //构造分页构造器
         Page<Setmeal> pageInfo = new Page<>(page, pageSize);
@@ -129,8 +130,9 @@ public class SetmealController {
     @GetMapping("/{id}")
     @ApiOperation(value = "查询套餐接口")
     @ApiImplicitParam(name = "id", value = "编号")
+    @Cacheable(value = "setmealCache",key = "#id", unless = "#result == null")
     public R<SetmealDto> get(@PathVariable Long id){
-        log.info("id: {}",id);
+//        log.info("id: {}",id);
 
         SetmealDto setmealDto = setmealService.getByIdWithDish(id);
 
@@ -145,9 +147,11 @@ public class SetmealController {
     @PutMapping
     @ApiOperation(value = "修改套餐接口")
     @ApiImplicitParam(name = "setmealDto", value = "套餐包装类")
+    //删除setmealCache分类下的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> update(@RequestBody SetmealDto setmealDto){
 
-        log.info("dishDto: {}",setmealDto);
+//        log.info("dishDto: {}",setmealDto);
         setmealService.updateWithDish(setmealDto);
         return R.success("修改菜品成功");
     }
@@ -180,6 +184,8 @@ public class SetmealController {
             @ApiImplicitParam(name = "status", value = "售卖状态", required = true),
             @ApiImplicitParam(name = "ids", value = "编号数组", required = true)
     })
+    //删除setmealCache分类下的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> updateStatus(@PathVariable Integer status,@RequestParam("ids") List<Long> ids){
         if (ids == null) {
             throw new CustomException("状态修改异常");

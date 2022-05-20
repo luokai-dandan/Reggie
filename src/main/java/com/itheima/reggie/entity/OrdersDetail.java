@@ -13,7 +13,7 @@ import java.math.BigDecimal;
  */
 @Data
 @ApiModel("订单详情")
-public class OrderDetail implements Serializable {
+public class OrdersDetail implements Serializable {
 
     @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;

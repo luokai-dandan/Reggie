@@ -51,7 +51,7 @@
                     <!-- <span>正在派送</span> -->
                 </div>
                 <div class="dishList">
-                    <div v-for="(item,index) in order[0].orderDetails" :key="index" class="item">
+                    <div v-for="(item,index) in order[0].ordersDetails" :key="index" class="item">
                         <span>{{item.name}}</span>
                         <span>x{{item.number}}</span>
                     </div>
@@ -95,7 +95,7 @@
                     order:[{
                         orderTime:'',//下单时间
                         status:undefined,//订单状态 1已结账，2未结账，3已退单，4已完成，5已取消
-                        orderDetails:[{
+                        ordersDetails:[{
                             name:'',//菜品名称
                             number:undefined,//数量
                         }],//明细
@@ -135,10 +135,9 @@
                     const res = await orderPagingApi(params)
                     if(res.code === 1){
                         this.order = res.data.records
-                        if(this.order && this.order[0].orderDetails){
+                        if(this.order && this.order[0].ordersDetails){
                             let number = 0
-                            alert()
-                            this.order[0].orderDetails.forEach(item=>{
+                            this.order[0].ordersDetails.forEach(item=>{
                                 number += item.number
                             })
                             this.order[0].sumNum = number

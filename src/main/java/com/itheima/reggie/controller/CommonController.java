@@ -33,8 +33,8 @@ import java.util.UUID;
 public class CommonController {
 
     //从配置文件中拿到文件上传后的保存路径
-    @Value("${reggie.path}")
-    private String basePath;
+    @Value("${custom-parameters.path.save-image-path}")
+    private String imagePath;
 
     /**
      * 文件上传
@@ -48,7 +48,7 @@ public class CommonController {
     //参数file必须和前端的name一致，否则无法收到参数
     public R<String> upload(MultipartFile file) {
         //file是个临时文件，需要转存到指定位置，否则本次请求完成后文件会删除
-        log.info(file.toString());
+//        log.info(file.toString());
 
         //原始文件名，通过字符串分割拿到后缀
         String originalFilename = file.getOriginalFilename();
@@ -56,17 +56,17 @@ public class CommonController {
 
         //使用UUID重新生成文件名，防止文件名称重复造成文件覆盖
         String fileName = UUID.randomUUID().toString() + fileNameSuffix;
-        log.info(fileName);
+//        log.info(fileName);
 
         //判断指定目录是否存在，不存在则创建
-        File dir = new File(basePath);
+        File dir = new File(imagePath);
         if (!dir.exists()) {
             dir.mkdir();
         }
 
         try {
             //将临时文件转存到指定位置
-            file.transferTo(new File(basePath + fileName));
+            file.transferTo(new File(imagePath + fileName));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,7 +84,7 @@ public class CommonController {
 
         try {
             //输入流，通过输入流读取文件内容
-            FileInputStream fileInputStream = new FileInputStream(new File(basePath + name));
+            FileInputStream fileInputStream = new FileInputStream(new File(imagePath + name));
             //输出流，通过输出流将文件写回浏览器，在浏览器展示图片
             ServletOutputStream outputStream = response.getOutputStream();
 

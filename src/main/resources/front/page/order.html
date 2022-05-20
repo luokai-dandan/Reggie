@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no,minimal-ui">
-        <title>瑞吉外卖移动端</title>
+        <title>菩提阁</title>
         <link rel="icon" href="./../images/favico.ico">
         <!--不同屏幕尺寸根字体设置-->
         <script src="./../js/base.js"></script>
@@ -38,7 +38,7 @@
                             <!-- <span>正在派送</span> -->
                         </div>
                         <div class="dishList">
-                            <div v-for="(item,index) in order.orderDetails" :key="index" class="item">
+                            <div v-for="(item,index) in order.ordersDetails" :key="index" class="item">
                                 <span>{{item.name}}</span>
                                 <span>x{{item.number}}</span>
                             </div>
@@ -115,7 +115,7 @@
                         if(records && Array.isArray(records)){
                             records.forEach(item=>{
                                 let number = 0
-                                item.orderDetails.forEach(ele=>{
+                                item.ordersDetails.forEach(ele=>{
                                     number += ele.number
                                 })
                                 item.sumNum = number

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * 购物车
  */
 @Data
-@ApiModel("购物车")
+@ApiModel("购物车类")
 public class ShoppingCart implements Serializable {
 
     @ApiModelProperty("序列化版本号")

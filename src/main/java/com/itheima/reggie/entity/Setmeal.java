@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * 套餐
  */
 @Data
-@ApiModel("套餐")
+@ApiModel("套餐类")
 public class Setmeal implements Serializable {
 
     @ApiModelProperty("序列化版本号")

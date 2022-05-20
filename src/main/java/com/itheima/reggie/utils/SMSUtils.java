@@ -11,7 +11,9 @@ import com.tencentcloudapi.sms.v20210111.SmsClient;
 import com.tencentcloudapi.sms.v20210111.models.SendSmsRequest;
 import com.tencentcloudapi.sms.v20210111.models.SendSmsResponse;
 
-
+/**
+ * 短信工具类封装
+ */
 public class SMSUtils {
     /**
      * 短信验证码

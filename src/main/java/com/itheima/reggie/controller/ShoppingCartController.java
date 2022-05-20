@@ -8,10 +8,13 @@ import com.itheima.reggie.service.ShoppingCartService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 购物车业务功能
@@ -25,15 +28,18 @@ public class ShoppingCartController {
     @Autowired
     private ShoppingCartService shoppingCartService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     /**
-     * 添加购物车
+     * 购物车加
      *
      * @param shoppingCart
      * @return
      */
     @PostMapping("/add")
     public R<ShoppingCart> add(@RequestBody ShoppingCart shoppingCart) {
-        log.info("shoppingCart: {}", shoppingCart);
+//        log.info("shoppingCart: {}", shoppingCart);
 
         // 设置用户id，指定当前是哪个用户的购物车数据
         Long userId = BaseContext.getCurrentId();
@@ -70,18 +76,22 @@ public class ShoppingCartController {
             cartServiceOne = shoppingCart;
         }
 
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("shoppingCart_*");
+        redisTemplate.delete(keys);
+
         return R.success(cartServiceOne);
     }
 
     /**
-     * 添加购物车
+     * 购物车减
      *
      * @param shoppingCart
      * @return
      */
     @PostMapping("/sub")
     public R<ShoppingCart> sub(@RequestBody ShoppingCart shoppingCart) {
-        log.info("shoppingCart: {}", shoppingCart);
+//        log.info("shoppingCart: {}", shoppingCart);
 
         // 设置用户id，指定当前是哪个用户的购物车数据
         Long userId = BaseContext.getCurrentId();
@@ -113,17 +123,37 @@ public class ShoppingCartController {
             //如果存在一份，则删除
             shoppingCartService.removeById(shoppingCartOne);
         }
+
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("shoppingCart_*");
+        redisTemplate.delete(keys);
+
         return R.success(shoppingCartOne);
     }
 
     @GetMapping("/list")
     public R<List<ShoppingCart>> list(){
 
+        List<ShoppingCart> shoppingCartList = null;
+        //动态构造key
+        String key = "shoppingCart_" + BaseContext.getCurrentId(); //dish_
+
+        //先从redis中获取缓存数据
+        shoppingCartList = (List<ShoppingCart>) redisTemplate.opsForValue().get(key);
+        //如果存在，直接返回，无需查询数据库
+        if (shoppingCartList != null) {
+            //如果存在，直接返回，无需查询数据库
+            return R.success(shoppingCartList);
+        }
+
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
         queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
 
-        List<ShoppingCart> shoppingCartList = shoppingCartService.list(queryWrapper);
+        shoppingCartList = shoppingCartService.list(queryWrapper);
+
+        //如果不存在，需要查询数据库，将查询到的菜品数据缓存到Redis
+        redisTemplate.opsForValue().set(key, shoppingCartList, 60, TimeUnit.MINUTES);
 
         return R.success(shoppingCartList);
     }
@@ -140,6 +170,10 @@ public class ShoppingCartController {
         queryWrapper.eq(ShoppingCart::getUserId, userId);
 
         shoppingCartService.remove(queryWrapper);
+
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("shoppingCart_*");
+        redisTemplate.delete(keys);
 
         return R.success("删除成功");
     }

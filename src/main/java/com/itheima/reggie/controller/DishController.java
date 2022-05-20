@@ -19,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 
 /**
  * 菜品管理
+ * 使用redisTemplate缓存
  */
 @Slf4j
 @RestController
@@ -58,7 +62,7 @@ public class DishController {
     @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
     public R<String> save(@RequestBody DishDto dishDto){
 
-        log.info("dishDto: {}",dishDto);
+//        log.info("dishDto: {}",dishDto);
         dishService.saveWithFlavor(dishDto);
 
         //清理所有菜品的缓存数据
@@ -87,7 +91,7 @@ public class DishController {
             @ApiImplicitParam(name = "name", value = "菜品名称", required = false)
     })
     public R<Page<DishDto>> page(int page, int pageSize, String name){
-        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
+//        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
 
         //构造分页构造器
         Page<Dish> pageInfo = new Page<>(page, pageSize);
@@ -139,7 +143,7 @@ public class DishController {
     @ApiOperation(value = "查询菜品接口")
     @ApiImplicitParam(name = "id", value = "菜品编号")
     public R<DishDto> get(@PathVariable Long id){
-        log.info("id: {}",id);
+//        log.info("id: {}",id);
 
         DishDto dishDto = dishService.getByIdWithFlavor(id);
 
@@ -156,7 +160,7 @@ public class DishController {
     @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
     public R<String> update(@RequestBody DishDto dishDto){
 
-        log.info("dishDto: {}",dishDto);
+//        log.info("dishDto: {}",dishDto);
         dishService.updateWithFlavor(dishDto);
         //清理所有菜品的缓存数据
 //        Set keys = redisTemplate.keys("dish_*");
@@ -169,6 +173,11 @@ public class DishController {
         return R.success("修改菜品成功");
     }
 
+    /**
+     * 删除菜品
+     * @param ids
+     * @return
+     */
     @DeleteMapping
     @ApiOperation(value = "菜品删除接口")
     @ApiImplicitParam(name = "ids", value = "菜品编号列表")

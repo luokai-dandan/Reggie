@@ -1,5 +1,6 @@
 package com.itheima.reggie.entity;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
  * 订单
  */
 @Data
+@ApiModel("订单类")
 public class Orders implements Serializable {
 
     @ApiModelProperty("序列化版本号")

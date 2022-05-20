@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
-@ApiModel("订单分页参数封装")
+@ApiModel("订单分页参数封装类")
 public class QueryPageDate implements Serializable {
 
     @ApiModelProperty("序列化版本号")
@@ -22,7 +22,7 @@ public class QueryPageDate implements Serializable {
     @ApiModelProperty("每页记录数")
     private int pageSize;
 
-    @ApiModelProperty("每页记录数")
+    @ApiModelProperty("订单号")
     private String number;
 
     @ApiModelProperty("开始日期格式转换")
@@ -34,4 +34,10 @@ public class QueryPageDate implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
+
+
+    public void setPageAndPageSize(int page, int pageSize) {
+        this.pageSize = pageSize;
+        this.page = page;
+    }
 }

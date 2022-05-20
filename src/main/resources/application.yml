@@ -11,7 +11,7 @@ spring:
 #      username: root
 #      password: MySQL5.7
 
-# 以下为读写分离
+# 以下为MySQL读写分离
   shardingsphere:
     datasource:
       names:
@@ -44,9 +44,9 @@ spring:
         show: true #开启SQL显示，默认false
   main:
     allow-bean-definition-overriding: true
-# 以上为读写分离
+# 以上为MySQL读写分离
 
-# redis
+# redis缓存数据
   redis:
     host: 192.168.24.129
     port: 6379
@@ -70,9 +70,10 @@ spring:
       database: reggiedb
       # 默认端口是27017
       port: 27017
-      #也可以使用uri连接
-      #uri: mongodb://192.168.40.134:27017/articledb
+      # 也可以使用uri连接
+      # uri: mongodb://192.168.40.134:27017/articledb
 
+  # kafka接受和发送订单消息
   kafka:
     bootstrap-servers: 192.168.24.129:9002
     producer:
@@ -98,6 +99,7 @@ spring:
     listener:
       ack-mode: MANUAL_IMMEDIATE
 
+
 # MybatisPlus
 mybatis-plus:
   configuration:
@@ -108,15 +110,32 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
 
-reggie:
-#  path: /usr/local/reggie/upload/
-  path: D:\Java\项目\瑞吉外卖\myCode\upload\
 
-sendMsg:
-  secretId: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
-  secretKey: c5OfwFZoHZlssjZJxhIgu7Nf2SsLuMn6
-  connTimeout: 5
-  sdkAppId: 1400677800
-  signName: 蛋蛋编程
-  templateId: 1401840
-  msgHead: 【瑞吉外卖】
+# 自定义参数
+custom-parameters:
+  # 图片相关参数
+  path:
+    # 图片保存路径
+    # centos保存路径
+#    save-image-path: /usr/local/reggie/upload/
+    # windows保存路径
+    save-image-path: D:\Java\项目\瑞吉外卖\myCode\upload\
+
+  # 短信验证码
+  send-msg:
+    # 是否启用
+    is-enable: false
+    # 腾讯云账户密钥对Id
+    secret-id: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
+    # 腾讯云账户密钥对Key
+    secret-key: c5OfwFZoHZlssjZJxhIgu7Nf2SsLuMn6
+    # SDK默认超时时间
+    conn-timeout: 5
+    # 短信应用ID
+    sdk-app-id: 1400677800
+    # 短信签名
+    sign-name: 蛋蛋编程
+    # 模板ID
+    template-id: 1401840
+    # 消息头
+    msg-head: 【瑞吉外卖】

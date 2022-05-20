@@ -3,12 +3,13 @@ package com.itheima.reggie.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.CustomException;
+import com.itheima.reggie.dto.OrdersDto;
 import com.itheima.reggie.entity.*;
 import com.itheima.reggie.mapper.OrdersMapper;
 import com.itheima.reggie.mongo.entity.Order;
+import com.itheima.reggie.mongo.service.OrderService;
 import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -26,6 +28,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> implements OrdersService {
+
+    @Autowired
+    private OrderService orderService;
 
     @Autowired
     private ShoppingCartService shoppingCartService;
@@ -37,7 +42,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private AddressBookService addressBookService;
 
     @Autowired
-    private OrderDetailService orderDetailService;
+    private OrdersDetailService ordersDetailService;
 
     //kafka
     @Autowired
@@ -81,19 +86,19 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         AtomicInteger amount = new AtomicInteger(0);
 
-        List<OrderDetail> orderDetailList = shoppingCarts.stream().map((item) -> {
-            OrderDetail orderDetail = new OrderDetail();
+        List<OrdersDetail> ordersDetailList = shoppingCarts.stream().map((item) -> {
+            OrdersDetail ordersDetail = new OrdersDetail();
 
-            orderDetail.setOrderId(orderId);
-            orderDetail.setNumber(item.getNumber());
-            orderDetail.setDishFlavor(item.getDishFlavor());
-            orderDetail.setDishId(item.getDishId());
-            orderDetail.setSetmealId(item.getSetmealId());
-            orderDetail.setName(item.getName());
-            orderDetail.setImage(item.getImage());
-            orderDetail.setAmount(item.getAmount());
+            ordersDetail.setOrderId(orderId);
+            ordersDetail.setNumber(item.getNumber());
+            ordersDetail.setDishFlavor(item.getDishFlavor());
+            ordersDetail.setDishId(item.getDishId());
+            ordersDetail.setSetmealId(item.getSetmealId());
+            ordersDetail.setName(item.getName());
+            ordersDetail.setImage(item.getImage());
+            ordersDetail.setAmount(item.getAmount());
             amount.addAndGet(item.getAmount().multiply(new BigDecimal(item.getNumber())).intValue());
-            return orderDetail;
+            return ordersDetail;
         }).collect(Collectors.toList());
 
         //填充其他信息
@@ -115,6 +120,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //将封端好的orders复制到mongodb的orders中
         Order orderMongo = new Order();
         BeanUtils.copyProperties(order, orderMongo);
+        //向orderMongo中插入订单详情
+        orderMongo.setOrdersDetail(ordersDetailList);
 
         //kafka发送订单消息
         String orderKey = "order_"+orderMongo.getId().toString();
@@ -124,9 +131,37 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         this.save(order);
 
         //向订单明细表插入数据，多条数据
-        orderDetailService.saveBatch(orderDetailList);
+        ordersDetailService.saveBatch(ordersDetailList);
 
         //清空购物车数据
         shoppingCartService.remove(queryWrapper);
+    }
+
+    /**
+     * 手机端查看订单及订单详情
+     * @param queryPageDate
+     * @return
+     */
+    @Override
+    public List<OrdersDto> getOrdersAndDetail(QueryPageDate queryPageDate) {
+
+        List<Order> orderList = orderService.getPageList(queryPageDate);
+
+        List<OrdersDto> orderDtoList = new ArrayList<>();
+
+        for(Order order: orderList){
+            LambdaQueryWrapper<OrdersDetail> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(OrdersDetail::getOrderId, order.getId());
+            List<OrdersDetail> ordersDetailList = ordersDetailService.list(queryWrapper);
+
+            OrdersDto orderDto = new OrdersDto();
+            BeanUtils.copyProperties(order, orderDto);
+            //对orderDto进行OrdersDetails属性的赋值
+            orderDto.setOrdersDetails(ordersDetailList);
+
+            orderDtoList.add(orderDto);
+        }
+
+        return orderDtoList;
     }
 }

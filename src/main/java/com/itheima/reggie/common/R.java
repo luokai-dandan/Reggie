@@ -1,7 +1,6 @@
 package com.itheima.reggie.common;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -27,6 +26,10 @@ public class R<T> implements Serializable {
     @ApiModelProperty("动态数据")
     private Map map = new HashMap(); //动态数据
 
+    @ApiOperation(value = "返回成功结果接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "object", value = "返回数据", required = true)
+    })
     public static <T> R<T> success(T object) {
         R<T> r = new R<T>();
         r.data = object;
@@ -34,6 +37,10 @@ public class R<T> implements Serializable {
         return r;
     }
 
+    @ApiOperation(value = "返回失败结果接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "object", value = "返回数据", required = true)
+    })
     public static <T> R<T> error(String msg) {
         R r = new R();
         r.msg = msg;
@@ -41,6 +48,11 @@ public class R<T> implements Serializable {
         return r;
     }
 
+    @ApiOperation(value = "返回添加数据接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "key", value = "新增数据键", required = true),
+            @ApiImplicitParam(name = "value", value = "新增数据值", required = true)
+    })
     public R<T> add(String key, Object value) {
         this.map.put(key, value);
         return this;

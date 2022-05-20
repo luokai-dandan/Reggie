@@ -3,7 +3,7 @@ package com.itheima.reggie.utils;
 import java.util.Random;
 
 /**
- * 随机生成验证码工具类
+ * 随机生成指定长度验证码工具类
  */
 public class ValidateCodeUtils {
     /**

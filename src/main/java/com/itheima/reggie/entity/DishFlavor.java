@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 菜品口味
  */
 @Data
-@ApiModel("菜品口味")
+@ApiModel("菜品口味类")
 public class DishFlavor implements Serializable {
 
     @ApiModelProperty("序列化版本号")

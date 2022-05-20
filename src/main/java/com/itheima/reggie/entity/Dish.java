@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  菜品
  */
 @Data
-@ApiModel("菜品")
+@ApiModel("菜品类")
 public class Dish extends Setmeal implements Serializable {
 
     @ApiModelProperty("序列化版本号")

@@ -23,15 +23,13 @@ public class OrderConsumer {
   @KafkaListener(topics = TOPIC_NAME,groupId = "MyGroup1")
   public void listenGroup(ConsumerRecord<String, Order> record, Acknowledgment ack) {
 
-    log.info("record : {}", record);
+//    log.info("record : {}", record);
 
     Order order = record.value();
-    log.info("order: {}", order);
+//    log.info("order: {}", order);
 
     orderService.saveOrder(order);
-
     //手动提交offset
     ack.acknowledge();
   }
-
 }

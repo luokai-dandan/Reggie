@@ -40,20 +40,22 @@ public class UserController {
     private RedisTemplate redisTemplate;
 
     // 腾讯云短信相关参数
-    @Value("${sendMsg.secretId}")
+    @Value("${custom-parameters.send-msg.secret-id}")
     private String secretId;
-    @Value("${sendMsg.secretKey}")
+    @Value("${custom-parameters.send-msg.secret-key}")
     private String secretKey;
-    @Value("${sendMsg.connTimeout}")
+    @Value("${custom-parameters.send-msg.conn-timeout}")
     private String connTimeout;
-    @Value("${sendMsg.sdkAppId}")
+    @Value("${custom-parameters.send-msg.sdk-app-id}")
     private String sdkAppId;
-    @Value("${sendMsg.signName}")
+    @Value("${custom-parameters.send-msg.sign-name}")
     private String signName;
-    @Value("${sendMsg.templateId}")
+    @Value("${custom-parameters.send-msg.template-id}")
     private String templateId;
-    @Value("${sendMsg.msgHead}")
+    @Value("${custom-parameters.send-msg.msg-head}")
     private String msgHead;
+    @Value("${custom-parameters.send-msg.is-enable}")
+    private String isEnable;
 
 
     @PostMapping("/sendMsg")
@@ -64,22 +66,32 @@ public class UserController {
     })
     public R<String> sendMsg(@RequestBody User user, HttpSession session){
 
-        log.info("user: {}", user.toString());
-        log.info("userPhoneNumber: {}", user.getPhone());
+//        log.info("user: {}", user.toString());
+//        log.info("userPhoneNumber: {}", user.getPhone());
         // 获取手机号
         String phoneNumber = user.getPhone();
         if (StringUtils.isNotEmpty(phoneNumber)) {
-            // 生成随机的验证码
-            //String verificationCode = ValidateCodeUtils.generateValidateCode(4).toString();
-            String verificationCode = "1234";
 
-            // 调用腾讯云短信服务API完成发送短信
-            String[] phoneNumberSet = {"+86" + phoneNumber};
-            //验证码数组
-            String[] captchaParameters = {msgHead, verificationCode, connTimeout};
-            log.info("验证码：{}", verificationCode);
+            //验证码
+            String verificationCode = null;
 
-            //SMSUtils.sendMessage(secretId, secretKey, connTimeout, sdkAppId, signName, templateId, captchaParameters, phoneNumberSet);
+            //启用腾讯短信验证码
+            if (isEnable.equals("true")) {
+                // 生成随机的验证码
+                verificationCode = ValidateCodeUtils.generateValidateCode(4).toString();
+                // 调用腾讯云短信服务API完成发送短信
+                String[] phoneNumberSet = {"+86" + phoneNumber};
+                //验证码数组
+                String[] captchaParameters = {msgHead, verificationCode, connTimeout};
+
+                SMSUtils.sendMessage(secretId, secretKey, connTimeout, sdkAppId, signName, templateId, captchaParameters, phoneNumberSet);
+
+            } else {
+                //关闭腾讯短信验证码
+                verificationCode = "1234";
+            }
+
+            log.info("短信验证码：{}", (verificationCode==null)?"null":verificationCode);
 
             // 需要将生成的验证码保存到Session中
             session.setAttribute(phoneNumber, verificationCode);

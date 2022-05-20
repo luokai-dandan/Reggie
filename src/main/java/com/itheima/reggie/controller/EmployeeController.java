@@ -13,6 +13,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +95,7 @@ public class EmployeeController {
             @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
     })
     public R<String> save(HttpServletRequest request, @RequestBody Employee employee){
-        log.info("新增员工，员工信息：{}", employee.toString());
+//        log.info("新增员工，员工信息：{}", employee.toString());
 
         // 设置初始密码123456，需要进行md5加密处理
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
@@ -126,7 +129,7 @@ public class EmployeeController {
             @ApiImplicitParam(name = "name", value = "员工姓名", required = false)
     })
     public R<Page<Employee>> page(int page, int pageSize, String name){
-        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
+//        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
 
         //构造分页构造器
         Page<Employee> pageInfo = new Page<>(page, pageSize);
@@ -157,7 +160,7 @@ public class EmployeeController {
             @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
     })
     public R<String> update(HttpServletRequest request, @RequestBody Employee employee){
-        log.info("employee:{}", employee.toString());
+//        log.info("employee:{}", employee.toString());
 
         //Long empId = (Long) request.getSession().getAttribute("employee");
         //employee.setUpdateTime(LocalDateTime.now());
@@ -177,7 +180,7 @@ public class EmployeeController {
     @ApiImplicitParam(name = "id", value = "员工编号")
     public R<Employee> getById(@PathVariable Long id){
 
-        log.info("根据id查询员工信息");
+//        log.info("根据id查询员工信息");
         Employee employee = employeeService.getById(id);
 
         return R.success(employee);

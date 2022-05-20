@@ -101,8 +101,8 @@ public class OrderService {
         int pageSize = queryPageDate.getPageSize();
         String number = queryPageDate.getNumber();
 
-        log.info("beginTime: {}", queryPageDate.getBeginTime());
-        log.info("endTime: {}", queryPageDate.getEndTime());
+//        log.info("beginTime: {}", queryPageDate.getBeginTime());
+//        log.info("endTime: {}", queryPageDate.getEndTime());
 
         if (number != null) {
             criteria.and("number").is(number);
@@ -120,12 +120,12 @@ public class OrderService {
         }
 
         query.addCriteria(criteria);
-        System.out.println(JSON.toJSONString(criteria));
+//        System.out.println(JSON.toJSONString(criteria));
         long count = mongoTemplate.count(query, Order.class); //计算总数,用于算法分页数
-        System.out.println(count);
+//        System.out.println(count);
 
         int pageTotal = (int) (count % pageSize == 0 ? count / pageSize : count / pageSize + 1); //总页数
-        System.out.println(pageTotal);
+//        System.out.println(pageTotal);
         int offset = (page - 1) * pageSize;
         query.with(Sort.by(Sort.Order.desc("orderTime"))); //排序逻辑
         query.skip(offset).limit(pageSize); // 分页逻辑

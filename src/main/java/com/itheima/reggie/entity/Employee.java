@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 * 员工实体
 * */
 @Data
-@ApiModel("员工")
+@ApiModel("员工类")
 public class Employee implements Serializable {
 
     @ApiModelProperty("序列化版本号")
