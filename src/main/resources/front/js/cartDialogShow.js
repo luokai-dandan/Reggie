@@ -1,3 +1,0 @@
-function cartDialogShow() {
-    this.cartDialogShow
-}

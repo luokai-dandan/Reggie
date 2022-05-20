@@ -30,15 +30,20 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @PostMapping
-    @ApiOperation(value = "分类新增接口")
+    /**
+     * 根据条件查询分类数据
+     *
+     * @param category
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation(value = "分类列表查询接口")
     @ApiImplicitParam(name = "category", value = "分类实体")
-    @CacheEvict(value = "categoryCache", allEntries = true)
-    public R<String> add(@RequestBody Category category) {
-//        log.info("category: {}", category.toString());
-        categoryService.save(category);
+    @Cacheable(value = "categoryCache", key = "#category.id + '_' + #category.type")
+    public R<List<Category>> list(Category category) {
 
-        return R.success("新增分类成功");
+        List<Category> categoryList = categoryService.getList(category);
+        return R.success(categoryList);
     }
 
     /**
@@ -55,19 +60,25 @@ public class CategoryController {
             @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true)
     })
     public R<Page<Category>> page(int page, int pageSize) {
-//        log.info("page = {}, pageSize = {}", page, pageSize);
 
-        //构造分页构造器
-        Page<Category> pageInfo = new Page<Category>(page, pageSize);
-        //构造条件构造器
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        //执行查询
-        //添加排序条件
-        queryWrapper.orderByAsc(Category::getSort);
-        //执行查询
-        categoryService.page(pageInfo, queryWrapper);
+        Page<Category> categoryPage = categoryService.getPage(page, pageSize);
+        return R.success(categoryPage);
+    }
 
-        return R.success(pageInfo);
+    /**
+     * 新增分类
+     *
+     * @param category
+     * @return
+     */
+    @PostMapping
+    @ApiOperation(value = "分类新增接口")
+    @ApiImplicitParam(name = "category", value = "分类实体")
+    @CacheEvict(value = "categoryCache", allEntries = true)
+    public R<String> add(@RequestBody Category category) {
+
+        Boolean addCategory = categoryService.addCategory(category);
+        return addCategory != null ? R.success("新增分类成功") : R.success("新增分类失败");
     }
 
     /**
@@ -81,10 +92,9 @@ public class CategoryController {
     @ApiImplicitParam(name = "category", value = "分类实体")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> update(@RequestBody Category category) {
-//        log.info("employee:{}", category.toString());
 
-        categoryService.updateById(category);
-        return R.success("分类信息修改成功");
+        Boolean update = categoryService.updateCategory(category);
+        return update ? R.success("分类信息修改成功") : R.success("分类信息修改失败");
     }
 
     /**
@@ -99,35 +109,9 @@ public class CategoryController {
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> delete(Long ids) {
 
-//        log.info("删除分类，id为：{}", ids);
-        // categoryService.removeById(ids);
-        categoryService.remove(ids);
-
-        return R.success("分类信息删除成功");
+        //log.info("删除分类，id为：{}", ids);
+        Boolean delete = categoryService.deleteCategoryById(ids);
+        return delete ? R.success("分类信息删除成功") : R.success("分类信息删除失败");
     }
 
-    /**
-     * 根据条件查询分类数据
-     *
-     * @param category
-     * @return
-     */
-    @GetMapping("/list")
-    @ApiOperation(value = "分类列表查询接口")
-    @ApiImplicitParam(name = "category", value = "分类实体")
-    @Cacheable(value = "categoryCache", key = "#category.id + '_' + #category.type")
-    public R<List<Category>> list(Category category) {
-
-//        log.info("category: {}",category.toString());
-        //条件构造器
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        //添加条件
-        queryWrapper.eq(category.getType() != null, Category::getType, category.getType());
-        //添加排序条件
-        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
-
-        List<Category> list = categoryService.list(queryWrapper);
-
-        return R.success(list);
-    }
 }

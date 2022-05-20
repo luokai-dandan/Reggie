@@ -173,7 +173,6 @@
                     if(res.code === 1){
                         window.requestAnimationFrame(()=>{
                             window.location.href = '/front/index.html'
-                            this.cartDialogShow = true
                         }) 
                     }else{
                         this.$notify({ type:'warning', message:res.msg});

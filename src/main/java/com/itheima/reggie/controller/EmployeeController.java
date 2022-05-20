@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 @Slf4j
 @RestController
@@ -31,91 +32,69 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+    /**
+     * 登录系统，返回对象包含失败标志和成功对象
+     *
+     * @param request
+     * @param employee
+     * @return
+     */
     @PostMapping("/login")
     @ApiOperation(value = "管理端员工登录接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "request", value = "请求对象", required = true),
             @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
     })
-    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
+    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee) {
 
         //1、将页面提交的密码password进行md5加密处理
         String password = employee.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
 
-        //2、根据页面提交的用户名username查询数据库
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Employee::getUsername, employee.getUsername());
-        Employee emp = employeeService.getOne(queryWrapper);
+        //2、查询用户
+        Employee user = employeeService.queryUser(employee);
 
         //3、如果没有查询到则返回登录失败结果
-        if (emp == null) {
-            return R.error("登陆失败");
+        if (user == null) {
+            return R.error("账号已过期，请重新登录");
         }
 
         //4、密码比对，如果不一致则返回登录失败结果
-        if (!emp.getPassword().equals(password)) {
-            return R.error("登陆失败");
+        if (!user.getPassword().equals(password)) {
+            return R.error("密码错误，登录失败");
         }
 
         //5、查看员工状态，如果为已禁用状态，则返回员工已禁用结果
-        if (emp.getStatus()==0) {
-            return R.error("账号已禁用");
+        if (user.getStatus() == 0) {
+            return R.error("账号已过期，请重新登录");
         }
 
         //6、登录成功，将员工id存入Session并返回登录成功结果
-        request.getSession().setAttribute("employee", emp.getId());
-        return R.success(emp);
+        request.getSession().setAttribute("employee", user.getId());
+
+        return R.success(user);
     }
 
     /**
      * 员工退出
+     *
      * @param request
      * @return
      */
     @PostMapping("/logout")
     @ApiOperation(value = "管理端员工登出接口")
     @ApiImplicitParam(name = "request", value = "请求对象")
-    public R<String> logout(HttpServletRequest request){
-        //清理Session中保存的当前登陆员工的id
-        request.getSession().removeAttribute("employee");
-        return R.success("退出成功");
-    }
+    public R<String> logout(HttpServletRequest request) {
 
-    /**
-     * 新增员工
-     * @param request
-     * @param employee
-     * @return
-     */
-    @PostMapping
-    @ApiOperation(value = "套餐分页查询接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "request", value = "请求对象", required = true),
-            @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
-    })
-    public R<String> save(HttpServletRequest request, @RequestBody Employee employee){
-//        log.info("新增员工，员工信息：{}", employee.toString());
+        Boolean logout = employeeService.logout(request);
 
-        // 设置初始密码123456，需要进行md5加密处理
-        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-
-        //employee.setCreateTime(LocalDateTime.now());
-        //employee.setUpdateTime(LocalDateTime.now());
-
-        //获取当前登录用户的id
-        //Long empId = (Long) request.getSession().getAttribute("employee");
-        //employee.setCreateUser(empId);
-        //employee.setUpdateUser(empId);
-
-        employeeService.save(employee);
-
-        return R.success("新增员工成功");
+        return logout ? R.success("退出成功") : R.success("退出失败");
     }
 
     /**
      * 员工信息分页查询
      * url：http://127.0.0.1:8080/employee/page?page=1&pageSize=10&name=123
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -128,61 +107,54 @@ public class EmployeeController {
             @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true),
             @ApiImplicitParam(name = "name", value = "员工姓名", required = false)
     })
-    public R<Page<Employee>> page(int page, int pageSize, String name){
-//        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
+    public R<Page<Employee>> page(int page, int pageSize, String name) {
 
-        //构造分页构造器
-        Page<Employee> pageInfo = new Page<>(page, pageSize);
-        //构造条件构造器
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        //执行查询
-        // 第一个参数为函数执行条件，只有name不为空才会执行下面代码，查询字段名为Employee::getName，参数为name的数据
-        queryWrapper.like(StringUtils.isNotEmpty(name), Employee::getName, name);
-        //创建用户为1
-        queryWrapper.eq(Employee::getCreateUser, BaseContext.getCurrentId());
-        //添加排序条件
-        queryWrapper.orderByDesc(Employee::getUpdateTime);
-        //执行查询
-        employeeService.page(pageInfo, queryWrapper);
+        Page<Employee> employeePage = employeeService.getPage(page, pageSize, name);
+        return employeePage != null ? R.success(employeePage) : R.success(null);
+    }
 
-        return R.success(pageInfo);
+    /**
+     * 新增员工
+     *
+     * @param employee
+     * @return
+     */
+    @PostMapping
+    @ApiOperation(value = "套餐分页查询接口")
+    @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    public R<String> save(@RequestBody Employee employee) {
+
+        Boolean addEmployee = employeeService.addEmployee(employee);
+        return addEmployee ? R.success("新增员工成功") : R.success("新增员工失败");
     }
 
     /**
      * 根据id修改员工信息
+     *
      * @param employee
      * @return
      */
     @PutMapping
     @ApiOperation(value = "员工信息修改接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "request", value = "请求对象", required = true),
-            @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
-    })
-    public R<String> update(HttpServletRequest request, @RequestBody Employee employee){
-//        log.info("employee:{}", employee.toString());
+    @ApiImplicitParam(name = "employee", value = "员工实体", required = true)
+    public R<String> update(@RequestBody Employee employee) {
 
-        //Long empId = (Long) request.getSession().getAttribute("employee");
-        //employee.setUpdateTime(LocalDateTime.now());
-        //employee.setUpdateUser(empId);
-
-        employeeService.updateById(employee);
-        return R.success("员工信息修改成功");
+        Boolean update = employeeService.updateEmployee(employee);
+        return update ? R.success("员工信息修改成功") : R.success("员工信息修改失败");
     }
 
     /**
      * 根据id查询员工信息
+     *
      * @param id
      * @return
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "员工信息查询接口")
     @ApiImplicitParam(name = "id", value = "员工编号")
-    public R<Employee> getById(@PathVariable Long id){
+    public R<Employee> getById(@PathVariable Long id) {
 
-//        log.info("根据id查询员工信息");
-        Employee employee = employeeService.getById(id);
-
-        return R.success(employee);
+        Employee employee = employeeService.getEmployeeById(id);
+        return employee != null ? R.success(employee) : R.success(null);
     }
 }
