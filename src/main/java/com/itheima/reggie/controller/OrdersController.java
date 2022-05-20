@@ -41,12 +41,13 @@ public class OrdersController {
 
     /**
      * 提交订单
+     *
      * @param orders
      * @return
      */
     @PostMapping("/submit")
     @ApiOperation(value = "订单提交接口")
-    @ApiImplicitParam(name = "order", value = "订单实体")
+    //@ApiImplicitParam(name = "orders", value = "订单实体")
     public R<String> submit(@RequestBody Orders orders) {
 
         ordersService.submitOrders(orders);
@@ -79,6 +80,7 @@ public class OrdersController {
 
     /**
      * 手机端通过mongodb查看订单信息
+     *
      * @param page
      * @param pageSize
      * @return
@@ -141,12 +143,13 @@ public class OrdersController {
 
     /**
      * mongo分页查询订单信息（管理端）
+     *
      * @param queryPageDate
      * @return
      */
     @GetMapping("/page")
     @ApiOperation(value = "管理端订单分页查询接口")
-    @ApiImplicitParam(name = "queryPageDate", value = "分页查询实体")
+    //@ApiImplicitParam(name = "queryPageDate", value = "分页查询实体")
     public R<Page<Order>> page(QueryPageDate queryPageDate) {
 
         Page<Order> orderPage = ordersService.getPage(queryPageDate);
@@ -156,13 +159,14 @@ public class OrdersController {
 
     /**
      * 修改订单状态
+     *
      * @param orders
      * @return
      */
     @PutMapping
     @ApiOperation(value = "订单状态修改接口")
-    @ApiImplicitParam(name = "order", value = "订单实体")
-    public R<String> status(@RequestBody Orders orders){
+    //@ApiImplicitParam(name = "orders", value = "订单实体")
+    public R<String> status(@RequestBody Orders orders) {
 
         ordersService.updateOrdersStatus(orders);
         return R.success("状态修改成功");
@@ -170,13 +174,14 @@ public class OrdersController {
 
     /**
      * 再来一单
+     *
      * @param map
      * @return
      */
     @PostMapping("/again")
     @ApiOperation(value = "再来一单接口")
-    @ApiImplicitParam(name = "map", value = "订单实体")
-    public R<String> again(@RequestBody Map<String,String> map){
+    //@ApiImplicitParam(name = "map", value = "订单实体")
+    public R<String> again(@RequestBody Map<String, String> map) {
 
         ordersService.againOrders(map);
         return R.success("操作成功");

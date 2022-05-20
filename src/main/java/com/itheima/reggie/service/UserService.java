@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ public interface UserService extends IService<User> {
 
     /**
      * 发送短信验证码
+     *
      * @param user
      * @param session
      * @return
@@ -19,15 +21,17 @@ public interface UserService extends IService<User> {
 
     /**
      * 登陆验证
+     *
      * @param map
      * @param session
      * @return
      */
-    public User phoneLogin(Map<String, String> map, HttpSession session);
+    public User phoneLogin(Map<String, String> map, HttpSession session, HttpServletResponse response);
 
     /**
      * 退出登录
+     *
      * @param request
      */
-    public void Logout(HttpServletRequest request);
+    public void Logout(HttpServletRequest request, HttpServletResponse response);
 }

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> implements SetmealService{
+public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> implements SetmealService {
 
     @Autowired
     private CategoryService categoryService;
@@ -40,6 +40,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     /**
      * 查询套餐列表
+     *
      * @param setmeal
      * @return
      */
@@ -48,9 +49,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         //构造查询条件
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(setmeal.getCategoryId()!=null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
         //添加条件，查询状态为1的菜品
-        queryWrapper.eq(setmeal.getStatus()!=null, Setmeal::getStatus,setmeal.getStatus());
+        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
         //添加排序条件
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
 
@@ -59,6 +60,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     /**
      * 套餐信息分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -87,7 +89,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         List<Setmeal> records = pageInfo.getRecords();
 
-        List<SetmealDto> setmealDtoList = records.stream().map((item)->{
+        List<SetmealDto> setmealDtoList = records.stream().map((item) -> {
             SetmealDto setmealDto = new SetmealDto();
             //将setmealDto除了categoryName属性外的属性通过item拷贝过来
             BeanUtils.copyProperties(item, setmealDto);
@@ -96,7 +98,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
             //根据id查询分类对象及对象中name属性
             Category category = categoryService.getById(categoryId);
             //查到了再做以下操作
-            if (category!=null) {
+            if (category != null) {
                 String categoryName = category.getName();
                 //将name赋值到setmealDto对象中，setmealDto其他属性通过上面的BeanUtils.copyProperties拷贝得到
                 setmealDto.setCategoryName(categoryName);
@@ -112,6 +114,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     /**
      * 新增套餐，同时保存套餐关联关系
+     *
      * @param setmealDto
      */
     @Override
@@ -122,7 +125,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         //从套餐封装类中分离出套餐包含的属性
         Setmeal setmeal = new Setmeal();
-        BeanUtils.copyProperties(setmealDto, setmeal, "setmealDishes","categoryName");
+        BeanUtils.copyProperties(setmealDto, setmeal, "setmealDishes", "categoryName");
 
         //生成ID
         Long setmealId = IdWorker.getId();
@@ -142,6 +145,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     /**
      * 根据id查询套餐信息和对应的菜品信息
+     *
      * @param id
      * @return
      */
@@ -171,6 +175,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     /**
      * 修改套餐
+     *
      * @param setmealDto
      */
     @Override
@@ -181,7 +186,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         //从套餐封装类中分离出套餐包含的属性
         Setmeal setmeal = new Setmeal();
-        BeanUtils.copyProperties(setmealDto, setmeal, "setmealDishes","categoryName");
+        BeanUtils.copyProperties(setmealDto, setmeal, "setmealDishes", "categoryName");
 
         //更新dish表的基本信息
         this.updateById(setmeal);
@@ -195,7 +200,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         //添加当前提交过来的口味数据--dish_flavor表的insert操作
         List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
 
-        setmealDishes = setmealDishes.stream().peek((item)->{
+        setmealDishes = setmealDishes.stream().peek((item) -> {
             item.setSetmealId(setmealDto.getId());
         }).collect(Collectors.toList());
 
@@ -204,6 +209,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     /**
      * 删除套餐及关联菜品
+     *
      * @param ids
      */
     @Override
@@ -217,7 +223,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         int count = this.count(queryWrapper);
 
         //如果不能删除，抛出一个业务异常
-        if (count>0) {
+        if (count > 0) {
             throw new CustomException("套餐正在售卖中，不能删除");
         }
         //如果可以删除，先删除套餐表中的数据--setmeal
@@ -225,13 +231,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         //delete from setmeal_dish where setmeal_id in (1,2,3)
         LambdaQueryWrapper<SetmealDish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.in(SetmealDish::getSetmealId,ids);
+        lambdaQueryWrapper.in(SetmealDish::getSetmealId, ids);
         //删除关系表中的数据---setmeal dish
         return setmealDishService.remove(lambdaQueryWrapper);
     }
 
     /**
      * 更新套餐状态
+     *
      * @param status
      * @param ids
      * @return

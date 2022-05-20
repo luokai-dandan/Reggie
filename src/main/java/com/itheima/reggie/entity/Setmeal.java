@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,7 +19,6 @@ import java.time.LocalDateTime;
 @ApiModel("套餐类")
 public class Setmeal implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")
@@ -52,19 +52,19 @@ public class Setmeal implements Serializable {
     @ApiModelProperty("图片")
     private String image;
 
-    @ApiModelProperty("套餐创建时间")
+    //@ApiModelProperty("套餐创建时间")
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
-    @ApiModelProperty("套餐更新时间")
+    //@ApiModelProperty("套餐更新时间")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
-    @ApiModelProperty("套餐创建人")
+    //@ApiModelProperty("套餐创建人")
     @TableField(fill = FieldFill.INSERT)
     private Long createUser;
 
-    @ApiModelProperty("套餐修改人")
+    //@ApiModelProperty("套餐修改人")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 

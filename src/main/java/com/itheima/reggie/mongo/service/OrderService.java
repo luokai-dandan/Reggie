@@ -90,6 +90,7 @@ public class OrderService {
 
     /**
      * 分页查询
+     *
      * @param queryPageDate
      * @return
      */
@@ -108,13 +109,13 @@ public class OrderService {
             criteria.and("number").is(number);
         }
 
-        if (queryPageDate.getBeginTime()!=null && queryPageDate.getEndTime()!=null) {
+        if (queryPageDate.getBeginTime() != null && queryPageDate.getEndTime() != null) {
             //Date
             Date beginTime = queryPageDate.getBeginTime();
             Date endTime = queryPageDate.getEndTime();
 
             criteria.andOperator(Criteria.where("orderTime").lte(endTime),
-                                 Criteria.where("orderTime").gte(beginTime));
+                    Criteria.where("orderTime").gte(beginTime));
         }
 
         query.addCriteria(criteria);

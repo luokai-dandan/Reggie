@@ -2,7 +2,6 @@ package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.mapper.UserMapper;
 import com.itheima.reggie.service.UserService;
@@ -15,14 +14,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
     private UserService userService;
@@ -51,6 +52,7 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
 
     /**
      * 发送短信验证码
+     *
      * @param user
      * @param session
      * @return
@@ -98,7 +100,7 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
     }
 
     @Override
-    public User phoneLogin(Map<String, String> map, HttpSession session) {
+    public User phoneLogin(Map<String, String> map, HttpSession session, HttpServletResponse response) {
 
         // 前端传来的手机号和验证码
         String phone = map.get("phone");
@@ -128,6 +130,15 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
             //将用户信息放入session
             session.setAttribute("user", user.getId());
 
+            //写入cookie
+            Cookie cooPhone = new Cookie("loginPhone", phone);
+            cooPhone.setMaxAge(10 * 24 * 60 * 60);
+            response.addCookie(cooPhone);
+
+            Cookie cooCode = new Cookie("loginCode", code);
+            cooCode.setMaxAge(10 * 24 * 60 * 60);
+            response.addCookie(cooCode);
+
             //登陆成功，删除redis中缓存的验证码
             redisTemplate.delete(phone);
 
@@ -138,12 +149,22 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
 
     /**
      * 退出登录
+     *
      * @param request
      */
     @Override
-    public void Logout(HttpServletRequest request) {
+    public void Logout(HttpServletRequest request, HttpServletResponse response) {
         //清理Session中保存的当前登陆员工的id
         request.getSession().removeAttribute("user");
+
+        //清理cookie
+        Cookie cooPhone = new Cookie("loginPhone", "1");
+        cooPhone.setMaxAge(0);
+        response.addCookie(cooPhone);
+
+        Cookie cooCode = new Cookie("loginCode", "1");
+        cooCode.setMaxAge(0);
+        response.addCookie(cooCode);
     }
 
 }

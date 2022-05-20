@@ -3,12 +3,15 @@ package com.itheima.reggie.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.io.Serializable;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+
 /**
  * 用户信息
  */
@@ -16,7 +19,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 @ApiModel("用户信息")
 public class User implements Serializable {
 
-    @ApiModelProperty("序列化版本号")
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("主键")

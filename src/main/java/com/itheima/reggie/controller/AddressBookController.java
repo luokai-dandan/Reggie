@@ -33,12 +33,12 @@ public class AddressBookController {
      */
     @GetMapping("/list")
     @ApiOperation(value = "地址列表查询接口")
-    @ApiImplicitParam(name = "addressBook", value = "地址列表", required = true)
+    //@ApiImplicitParam(name = "addressBook", value = "地址列表")
     @Cacheable(value = "addressBookCache", key = "#addressBook.id + '_' + #addressBook.userId")
     public R<List<AddressBook>> list(AddressBook addressBook) {
 
         List<AddressBook> addressBookList = addressBookService.getList(addressBook);
-        return addressBookList!=null?R.success(addressBookList):R.error("查询错误");
+        return addressBookList != null ? R.success(addressBookList) : R.error("查询错误");
     }
 
     /**
@@ -49,12 +49,12 @@ public class AddressBookController {
      */
     @PostMapping
     @ApiOperation(value = "新增地址接口")
-    @ApiImplicitParam(name = "addressBook", value = "地址实体")
+    //@ApiImplicitParam(name = "addressBook", value = "地址实体")
     @CacheEvict(value = "addressBookCache", allEntries = true)
     public R<AddressBook> add(@RequestBody AddressBook addressBook) {
 
         AddressBook addAddr = addressBookService.addAddr(addressBook);
-        return addAddr!=null?R.success(addAddr):R.error("查询错误");
+        return addAddr != null ? R.success(addAddr) : R.error("查询错误");
     }
 
     /**
@@ -65,7 +65,7 @@ public class AddressBookController {
      */
     @DeleteMapping
     @ApiOperation(value = "删除地址接口")
-    @ApiImplicitParam(name = "ids", value = "地址编号")
+    //@ApiImplicitParam(name = "ids", value = "地址编号")
     //删除setmealCache分类下的所有缓存数据
     @CacheEvict(value = "addressBookCache", allEntries = true)
     public R<String> delete(long ids) {
@@ -79,12 +79,12 @@ public class AddressBookController {
      */
     @PutMapping("default")
     @ApiOperation(value = "设置默认地址接口")
-    @ApiImplicitParam(name = "addressBook", value = "地址实体")
+    //@ApiImplicitParam(name = "addressBook", value = "地址实体")
     @CacheEvict(value = "addressBookCache", allEntries = true)
     public R<AddressBook> setDefault(@RequestBody AddressBook addressBook) {
 
         AddressBook setDefaultAddr = addressBookService.setDefaultAddr(addressBook);
-        return setDefaultAddr!=null?R.success(setDefaultAddr):R.error("查询错误");
+        return setDefaultAddr != null ? R.success(setDefaultAddr) : R.error("查询错误");
     }
 
     /**
@@ -92,7 +92,7 @@ public class AddressBookController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "地址查询接口")
-    @ApiImplicitParam(name = "id", value = "地址编号")
+    //@ApiImplicitParam(name = "id", value = "地址编号")
     @Cacheable(value = "addressBookCache", key = "#id", unless = "#result == null")
     public R<AddressBook> get(@PathVariable Long id) {
 
@@ -117,6 +117,7 @@ public class AddressBookController {
      */
     @PutMapping
     @ApiOperation(value = "修改地址")
+    //@ApiImplicitParam(name = "addressBook", value = "地址实体")
     @CacheEvict(value = "addressBookCache", allEntries = true)
     public R<String> update(@RequestBody AddressBook addressBook) {
 

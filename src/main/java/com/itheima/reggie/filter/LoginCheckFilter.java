@@ -58,7 +58,7 @@ public class LoginCheckFilter implements Filter {
             return;
         }
         //4-1、判断登录状态，如果已登录，则直接放行
-        if (request.getSession().getAttribute("employee")!=null) {
+        if (request.getSession().getAttribute("employee") != null) {
 //            log.info("用户已登录，用户id为{}",request.getSession().getAttribute("employee"));
 
             Long empId = (Long) request.getSession().getAttribute("employee");
@@ -69,7 +69,7 @@ public class LoginCheckFilter implements Filter {
         }
 
         //4-2、判断移动端登录状态，如果已登录，则直接放行
-        if (request.getSession().getAttribute("user")!=null) {
+        if (request.getSession().getAttribute("user") != null) {
 //            log.info("用户已登录，用户id为{}",request.getSession().getAttribute("user"));
 
             Long userId = (Long) request.getSession().getAttribute("user");
@@ -88,12 +88,13 @@ public class LoginCheckFilter implements Filter {
 
     /**
      * 路径匹配，检查本次请求是否需要放行
+     *
      * @param urls
      * @param requestURI
      * @return
      */
-    public boolean check(String[] urls, String requestURI){
-        for (String url:urls){
+    public boolean check(String[] urls, String requestURI) {
+        for (String url : urls) {
             boolean match = PATH_MATCHER.match(url, requestURI);
             if (match) {
                 return true;

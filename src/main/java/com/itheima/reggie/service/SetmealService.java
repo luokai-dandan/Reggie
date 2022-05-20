@@ -12,6 +12,7 @@ public interface SetmealService extends IService<Setmeal> {
 
     /**
      * 查询套餐列表
+     *
      * @param setmeal
      * @return
      */
@@ -19,6 +20,7 @@ public interface SetmealService extends IService<Setmeal> {
 
     /**
      * 套餐信息分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -28,12 +30,14 @@ public interface SetmealService extends IService<Setmeal> {
 
     /**
      * 新增套餐，同时保存套餐关联关系
+     *
      * @param setmealDto
      */
     public Boolean addSetmealWithDish(SetmealDto setmealDto);
 
     /**
      * 根据id查询套餐信息和对应的菜品信息
+     *
      * @param id
      * @return
      */
@@ -41,6 +45,7 @@ public interface SetmealService extends IService<Setmeal> {
 
     /**
      * 修改套餐
+     *
      * @param setmealDto
      * @return
      */
@@ -48,6 +53,7 @@ public interface SetmealService extends IService<Setmeal> {
 
     /**
      * 删除套餐及关联的菜品
+     *
      * @param ids
      * @return
      */
@@ -55,6 +61,7 @@ public interface SetmealService extends IService<Setmeal> {
 
     /**
      * 更新套餐状态
+     *
      * @param status
      * @param ids
      * @return

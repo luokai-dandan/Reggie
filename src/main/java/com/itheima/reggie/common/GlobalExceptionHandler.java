@@ -19,18 +19,19 @@ public class GlobalExceptionHandler {
 
     /**
      * 异常处理方法
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public R<String> exceptionHandler(SQLIntegrityConstraintViolationException ex){
+    public R<String> exceptionHandler(SQLIntegrityConstraintViolationException ex) {
 
         String exMessage = ex.getMessage();
         log.error(exMessage);
         //Duplicate entry 'zhangsan' for key 'idx_username'
         if (exMessage.contains("Duplicate entry")) {
             String[] split = exMessage.split("'");
-            String msg = split[1]+"已存在";
+            String msg = split[1] + "已存在";
             return R.error(msg);
         }
 
@@ -39,11 +40,12 @@ public class GlobalExceptionHandler {
 
     /**
      * 异常处理方法
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(CustomException.class)
-    public R<String> exceptionHandler(CustomException ex){
+    public R<String> exceptionHandler(CustomException ex) {
 
         log.error(ex.getMessage());
 

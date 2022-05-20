@@ -40,6 +40,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     /**
      * 扩展mvc框架的消息转换器
+     *
      * @param converters
      */
     @Override
@@ -50,16 +51,17 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         //设置对象转换器，底层使用Jackson将Java对象转为json
         messageConverter.setObjectMapper(new JacksonObjectMapper());
         //将上面的消息转换器追加到mvc框架的转换器集合中
-        converters.add(0,messageConverter);
+        converters.add(0, messageConverter);
 
     }
 
     /**
      * Swagger
+     *
      * @return
      */
     @Bean
-    public Docket createRestApi(){
+    public Docket createRestApi() {
         //文档类型
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
@@ -68,7 +70,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
                 .paths(PathSelectors.any())
                 .build();
     }
-    private ApiInfo apiInfo(){
+
+    private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("瑞吉外卖")
                 .version("1.0")
