@@ -1,5 +1,6 @@
 package com.itheima.reggie.controller;
 
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -29,9 +30,16 @@ import java.util.UUID;
 @Api(tags = "公共接口(上传下载图片)")
 public class CommonController {
 
+    //是否启用linux保存图片
+    @Value("${custom-parameters.path.enable-linux}")
+    private String enableLinux;
+
+    @Value("${custom-parameters.path.save-image-path-linux}")
+    private String saveImagePathLinux;
+
     //从配置文件中拿到文件上传后的保存路径
-    @Value("${custom-parameters.path.save-image-path}")
-    private String imagePath;
+    @Value("${custom-parameters.path.save-image-path-windows}")
+    private String saveImagePathWindows;
 
     /**
      * 文件上传
@@ -46,6 +54,18 @@ public class CommonController {
     public R<String> upload(MultipartFile file) {
         //file是个临时文件，需要转存到指定位置，否则本次请求完成后文件会删除
 //        log.info(file.toString());
+
+        //上传图片保存路径
+        String imagePath = null;
+        if (enableLinux.equals("true")) {
+            //使用linux路径
+            imagePath = saveImagePathLinux;
+        } else if (enableLinux.equals("false")){
+            //使用Windows路径
+            imagePath = saveImagePathWindows;
+        } else {
+            throw new CustomException("图片上传路径异常");
+        }
 
         //原始文件名，通过字符串分割拿到后缀
         String originalFilename = file.getOriginalFilename();
@@ -78,6 +98,18 @@ public class CommonController {
             @ApiImplicitParam(name = "response", value = "响应对象", required = true)
     })
     public void download(String name, HttpServletResponse response) {
+
+        //上传图片保存路径
+        String imagePath = null;
+        if (enableLinux.equals("true")) {
+            //使用linux路径
+            imagePath = saveImagePathLinux;
+        } else if (enableLinux.equals("false")){
+            //使用Windows路径
+            imagePath = saveImagePathWindows;
+        } else {
+            throw new CustomException("图片上传路径异常");
+        }
 
         try {
             //输入流，通过输入流读取文件内容
