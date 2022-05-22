@@ -15,10 +15,12 @@ import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,6 +58,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     //kafka消息主题
     private final static String TOPIC_NAME = "order-topic";
 
+    @Autowired
+    private RedisTemplate<Object, Object> RedisTemplate;
+
     /**
      * 用户下单
      *
@@ -68,7 +73,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //log.info("订单数据：{}", order);
 
         //获取当前用户id
-        Long currentId = BaseContext.getCurrentId();
+        //Long currentId = BaseContext.getCurrentId();
+        Long currentId = (Long) RedisTemplate.opsForValue().get("user");
 
         //查询当前用户购物车数据
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
@@ -246,7 +252,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         String ids = map.get("id");
         long id = Long.parseLong(ids);
 
-        Long userId = BaseContext.getCurrentId();
+        //Long userId = BaseContext.getCurrentId();
+        Long userId = (Long) RedisTemplate.opsForValue().get("user");
 
         LambdaQueryWrapper<OrdersDetail> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(OrdersDetail::getOrderId, id);

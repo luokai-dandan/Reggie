@@ -8,11 +8,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -48,7 +45,7 @@ public class ShoppingCartController {
      */
     @PostMapping("/add")
     @ApiOperation(value = "+到购物车接口")
-    //@ApiImplicitParam(name = "shoppingCart", value = "购物车实体")
+    @ApiImplicitParam(name = "shoppingCart", value = "购物车实体")
     public R<ShoppingCart> add(@RequestBody ShoppingCart shoppingCart) {
 
         ShoppingCart sc = shoppingCartService.addDishToSC(shoppingCart);
@@ -63,7 +60,7 @@ public class ShoppingCartController {
      */
     @PostMapping("/sub")
     @ApiOperation(value = "从购物车-接口")
-    //@ApiImplicitParam(name = "shoppingCart", value = "购物车实体")
+    @ApiImplicitParam(name = "shoppingCart", value = "购物车实体")
     public R<ShoppingCart> sub(@RequestBody ShoppingCart shoppingCart) {
 
         ShoppingCart shoppingCartOne = shoppingCartService.subDishToSC(shoppingCart);

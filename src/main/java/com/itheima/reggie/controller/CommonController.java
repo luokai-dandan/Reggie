@@ -1,25 +1,22 @@
 package com.itheima.reggie.controller;
 
-import com.github.qcloudsms.SmsSingleSender;
-import com.github.qcloudsms.SmsSingleSenderResult;
-import com.github.qcloudsms.httpclient.HTTPException;
 import com.itheima.reggie.common.R;
-import com.itheima.reggie.utils.SMSUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -44,7 +41,7 @@ public class CommonController {
      */
     @PostMapping("/upload")
     @ApiOperation(value = "图片上传接口")
-    //@ApiImplicitParam(name = "file", value = "文件")
+    @ApiImplicitParam(name = "file", value = "文件")
     //参数file必须和前端的name一致，否则无法收到参数
     public R<String> upload(MultipartFile file) {
         //file是个临时文件，需要转存到指定位置，否则本次请求完成后文件会删除

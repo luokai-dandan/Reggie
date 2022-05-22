@@ -2,7 +2,7 @@ package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.itheima.reggie.common.BaseContext;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.mapper.ShoppingCartMapper;
 import com.itheima.reggie.service.ShoppingCartService;
@@ -25,8 +25,11 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Autowired
     private ShoppingCartService shoppingCartService;
 
-    //@Resource
-    //private RedisTemplate<String, List<ShoppingCart>> redisTemplate;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplateShoppingCart;
+
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 购物车列表
@@ -36,25 +39,27 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public List<ShoppingCart> getList() {
 
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
+        List<ShoppingCart> shoppingCartList = null;
         //动态构造key
-        //String key = "shoppingCart_" + BaseContext.getCurrentId(); //dish_
-
+        String key = "shoppingCart_" + userId;
         //先从redis中获取缓存数据
-        //shoppingCartList = redisTemplate.opsForValue().get(key);
+        shoppingCartList = (List<ShoppingCart>) redisTemplateShoppingCart.opsForValue().get(key);
         //如果存在，直接返回，无需查询数据库
-        //if (shoppingCartList != null) {
-        //    //如果存在，直接返回，无需查询数据库
-        //    return shoppingCartList;
-        //}
-
+        if (shoppingCartList != null) {
+            //如果存在，直接返回，无需查询数据库
+            return shoppingCartList;
+        }
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
+        queryWrapper.eq(ShoppingCart::getUserId, userId);
         queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
 
-        //如果不存在，需要查询数据库，将查询到的菜品数据缓存到Redis
-        //redisTemplate.opsForValue().set(key, shoppingCartList, 60, TimeUnit.MINUTES);
+        shoppingCartList = shoppingCartService.list(queryWrapper);
 
-        return shoppingCartService.list(queryWrapper);
+        //如果不存在，需要查询数据库，将查询到的菜品数据缓存到Redis
+        redisTemplateShoppingCart.opsForValue().set(key, shoppingCartList, 60, TimeUnit.MINUTES);
+
+        return shoppingCartList;
     }
 
     /**
@@ -69,7 +74,8 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         //log.info("shoppingCart: {}", shoppingCart);
 
         // 设置用户id，指定当前是哪个用户的购物车数据
-        Long userId = BaseContext.getCurrentId();
+        //Long userId = BaseContext.getCurrentId();
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
         shoppingCart.setUserId(userId);
 
         // 同一菜品重复添加购物车，并不需要在数据库添加多份，而是修改同一菜品份数
@@ -104,8 +110,8 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         }
 
         //清理所有菜品的缓存数据
-        //Set keys = redisTemplate.keys("shoppingCart_*");
-        //redisTemplate.delete(keys);
+        Set<Object> keys = redisTemplateShoppingCart.keys("shoppingCart_*");
+        redisTemplateShoppingCart.delete(Objects.requireNonNull(keys));
 
         return sc;
     }
@@ -119,56 +125,71 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public ShoppingCart subDishToSC(ShoppingCart shoppingCart) {
 
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
+
         Long dishId = shoppingCart.getDishId();
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
 
-        //代表数量减少的是菜品数量
+        //代表是菜品数量减少
         if (dishId != null) {
             //通过dishId查出购物车对象
             queryWrapper.eq(ShoppingCart::getDishId, dishId);
-            //这里必须要加两个条件，否则会出现用户互相修改对方与自己购物车中相同套餐或者是菜品的数量
-            queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
-            ShoppingCart cart1 = shoppingCartService.getOne(queryWrapper);
-            cart1.setNumber(cart1.getNumber() - 1);
-            Integer LatestNumber = cart1.getNumber();
+            //确保是该用户下的购物车
+            queryWrapper.eq(ShoppingCart::getUserId, userId);
+            //查询购物车中减的该对象
+            ShoppingCart cartDish = shoppingCartService.getOne(queryWrapper);
+            //数量减一
+            cartDish.setNumber(cartDish.getNumber() - 1);
+            //减完重新获取该对象的数量
+            Integer LatestNumber = cartDish.getNumber();
+            //减完数量仍然大于零，更新number字段
             if (LatestNumber > 0) {
                 //对数据进行更新操作
-                shoppingCartService.updateById(cart1);
+                shoppingCartService.updateById(cartDish);
             } else if (LatestNumber == 0) {
                 //如果购物车的菜品数量减为0，那么就把菜品从购物车删除
-                shoppingCartService.removeById(cart1.getId());
-            } else if (LatestNumber < 0) {
-                return null;
+                shoppingCartService.removeById(cartDish.getId());
+            } else {
+                //数量小于0，抛异常
+                throw new CustomException("购物车异常");
             }
-
-            return cart1;
+            //返回该对象
+            return cartDish;
         }
 
         Long setmealId = shoppingCart.getSetmealId();
+        // 代表是套餐数量减少
         if (setmealId != null) {
-            //代表是套餐数量减少
-            queryWrapper.eq(ShoppingCart::getSetmealId, setmealId).eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
-            ShoppingCart cart2 = shoppingCartService.getOne(queryWrapper);
-            cart2.setNumber(cart2.getNumber() - 1);
-            Integer LatestNumber = cart2.getNumber();
+            //通过setmealId查出购物车对象
+            queryWrapper.eq(ShoppingCart::getSetmealId, setmealId);
+            //确保是该用户下的购物车
+            queryWrapper.eq(ShoppingCart::getUserId, userId);
+            //查询购物车中减的该对象
+            ShoppingCart cartSetmeal = shoppingCartService.getOne(queryWrapper);
+            //数量减一
+            cartSetmeal.setNumber(cartSetmeal.getNumber() - 1);
+            //减完重新获取该对象的数量
+            Integer LatestNumber = cartSetmeal.getNumber();
+            //减完数量仍然大于零，更新number字段
             if (LatestNumber > 0) {
                 //对数据进行更新操作
-                shoppingCartService.updateById(cart2);
+                shoppingCartService.updateById(cartSetmeal);
             } else if (LatestNumber == 0) {
                 //如果购物车的套餐数量减为0，那么就把套餐从购物车删除
-                shoppingCartService.removeById(cart2.getId());
-            } else if (LatestNumber < 0) {
-                return null;
+                shoppingCartService.removeById(cartSetmeal.getId());
+            } else {
+                //数量小于0，抛异常
+                throw new CustomException("购物车异常");
             }
-            return cart2;
+            //返回该对象
+            return cartSetmeal;
         }
-        //如果两个大if判断都进不去
-        return null;
-
-
         //清理所有菜品的缓存数据
-        //Set keys = redisTemplate.keys("shoppingCart_*");
-        //redisTemplate.delete(keys);
+        Set<Object> keys = redisTemplateShoppingCart.keys("shoppingCart_*");
+        redisTemplateShoppingCart.delete(Objects.requireNonNull(keys));
+
+        //既不是菜品又不是套餐，直接返回
+        return null;
     }
 
     /**
@@ -179,7 +200,9 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public void cleanSC() {
 
-        Long userId = BaseContext.getCurrentId();
+        //Long userId = BaseContext.getCurrentId();
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
+        //log.info("BaseContext.getCurrentId()：{}", userId);
 
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ShoppingCart::getUserId, userId);
@@ -187,8 +210,8 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         shoppingCartService.remove(queryWrapper);
 
         //清理所有菜品的缓存数据
-        //Set keys = redisTemplate.keys("shoppingCart_*");
-        //redisTemplate.delete(keys);
+        Set<Object> keys = redisTemplateShoppingCart.keys("shoppingCart_*");
+        redisTemplateShoppingCart.delete(Objects.requireNonNull(keys));
     }
 
 }

@@ -11,12 +11,15 @@ import com.itheima.reggie.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -24,6 +27,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 登录系统，返回登录对象
@@ -44,8 +50,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     @Override
     public void login(Employee employee, HttpServletRequest request, HttpServletResponse response) {
 
-        //6、登录成功，将员工id存入Session并返回登录成功结果
+        //登录成功，将员工id存入Session并返回登录成功结果
         request.getSession().setAttribute("employee", employee.getId());
+
+        //将用户id缓存到redis中
+        redisTemplate.opsForValue().set("employee", employee.getId(), 60, TimeUnit.MINUTES);
 
         //写入cookie
         Cookie cookieUserId = new Cookie("loginUser", employee.getId().toString());
@@ -55,6 +64,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         Cookie cookieCode = new Cookie("loginPwd", employee.getPassword());
         cookieCode.setMaxAge(10 * 24 * 60 * 60);
         response.addCookie(cookieCode);
+
+        //缓存到Redis
+        redisTemplate.opsForValue().set("employee", employee.getId(), 60, TimeUnit.MINUTES);
 
     }
 
@@ -73,12 +85,15 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         cookieCode.setMaxAge(0);
         response.addCookie(cookieCode);
 
+        redisTemplate.delete("employee");
+
         return true;
     }
 
     @Override
     public Page<Employee> getPage(int page, int pageSize, String name) {
 
+        Long employeeId = (Long) redisTemplate.opsForValue().get("employee");
         //log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
 
         //构造分页构造器
@@ -89,7 +104,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // 第一个参数为函数执行条件，只有name不为空才会执行下面代码，查询字段名为Employee::getName，参数为name的数据
         queryWrapper.like(StringUtils.isNotEmpty(name), Employee::getName, name);
         //创建用户为1
-        queryWrapper.eq(Employee::getCreateUser, BaseContext.getCurrentId());
+        queryWrapper.eq(Employee::getCreateUser, employeeId);
         //添加排序条件
         queryWrapper.orderByDesc(Employee::getUpdateTime);
         //执行查询
@@ -136,8 +151,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     public Employee getEmployeeById(Long id) {
 
         //log.info("根据id查询员工信息");
-        Employee employee = employeeService.getById(id);
-        return employee;
+        return employeeService.getById(id);
     }
 
 }

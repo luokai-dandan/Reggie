@@ -30,14 +30,14 @@ public class CategoryController {
     private CategoryService categoryService;
 
     /**
-     * 根据条件查询分类数据
+     * 手机端查询分类数据
      *
      * @param category
      * @return
      */
     @GetMapping("/list")
     @ApiOperation(value = "分类列表查询接口")
-    //@ApiImplicitParam(name = "category", value = "分类实体")
+    @ApiImplicitParam(name = "category", value = "分类实体")
     @Cacheable(value = "categoryCache", key = "#category.id + '_' + #category.type")
     public R<List<Category>> list(Category category) {
 
@@ -72,12 +72,12 @@ public class CategoryController {
      */
     @PostMapping
     @ApiOperation(value = "分类新增接口")
-    //@ApiImplicitParam(name = "category", value = "分类实体")
+    @ApiImplicitParam(name = "category", value = "分类实体")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> add(@RequestBody Category category) {
 
         Boolean addCategory = categoryService.addCategory(category);
-        return addCategory != null ? R.success("新增分类成功") : R.error("新增分类失败");
+        return addCategory ? R.success("新增分类成功") : R.error("新增分类失败");
     }
 
     /**
@@ -88,7 +88,7 @@ public class CategoryController {
      */
     @PutMapping
     @ApiOperation(value = "分类修改接口")
-    //@ApiImplicitParam(name = "category", value = "分类实体")
+    @ApiImplicitParam(name = "category", value = "分类实体")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> update(@RequestBody Category category) {
 
@@ -104,7 +104,7 @@ public class CategoryController {
      */
     @DeleteMapping
     @ApiOperation(value = "分类删除接口")
-    //@ApiImplicitParam(name = "ids", value = "分类编号")
+    @ApiImplicitParam(name = "ids", value = "分类编号")
     @CacheEvict(value = "categoryCache", allEntries = true)
     public R<String> delete(Long ids) {
 

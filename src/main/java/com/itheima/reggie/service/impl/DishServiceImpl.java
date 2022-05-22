@@ -1,6 +1,8 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
@@ -19,6 +21,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -68,6 +71,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
         //添加条件，查询状态为1的菜品
         queryWrapper.eq(dish.getStatus() != null, Dish::getStatus, dish.getStatus());
+        //添加条件，查询未删除的菜品0
+        queryWrapper.eq(Dish::getIsDeleted, 0);
         //添加排序条件
         queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
 
@@ -123,6 +128,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //执行查询
         // 第一个参数为函数执行条件，只有name不为空才会执行下面代码，查询字段名为Dish::getName，参数为name的数据
         queryWrapper.like(StringUtils.isNotEmpty(name), Dish::getName, name);
+        //添加条件，查询未删除的菜品0
+        queryWrapper.eq(Dish::getIsDeleted, 0);
         //添加排序条件
         queryWrapper.orderByDesc(Dish::getUpdateTime);
         //执行查询
@@ -162,11 +169,26 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @param dishDto
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
     public Boolean addDishWithFlavor(DishDto dishDto) {
 
         //log.info("dishDto: {}",dishDto);
-        //保存菜品的基本信息到菜品表dish
+
+        //更新前判断名字是否和已删除的菜品名差生冲突
+        LambdaQueryWrapper<Dish> queryWrapperSameNameDeleted = new LambdaQueryWrapper<>();
+        queryWrapperSameNameDeleted.eq(Dish::getName, dishDto.getName());
+        queryWrapperSameNameDeleted.eq(Dish::getIsDeleted, 1);
+        int count = dishService.count(queryWrapperSameNameDeleted);
+
+        if (count == 1) {
+            //存在同名删除后的分类，删除已存在的数据，重新插入新的数据
+            //因为name为索引字段，具有唯一性，用name来取id
+            Dish dishDeleted = dishService.getOne(queryWrapperSameNameDeleted);
+            //彻底移除
+            dishService.removeById(dishDeleted.getId());
+        }
+
+        //清理干净后或者不存在旧记录则保存菜品的基本信息到菜品表dish
         boolean addDish = this.save(dishDto);
 
         //List<DishFlavor>中未封装dishId
@@ -199,25 +221,58 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @param dishDto
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
     public Boolean updateDishWithFlavor(DishDto dishDto) {
 
         //log.info("dishDto: {}",dishDto);
 
         //更新dish表的基本信息
-        boolean updateDish = this.updateById(dishDto);
+        //boolean updateDish = this.updateById(dishDto);
 
-        //清理当前菜品对应的口味数据--dish_flaovr表的delete操作
+        //更新前判断名字是否和已删除的菜品名发生冲突
+        LambdaQueryWrapper<Dish> queryWrapperSameNameDeleted = new LambdaQueryWrapper<>();
+        queryWrapperSameNameDeleted.eq(Dish::getName, dishDto.getName());
+        queryWrapperSameNameDeleted.eq(Dish::getIsDeleted, 1);
+        int count = dishService.count(queryWrapperSameNameDeleted);
+        //删除标志
+        boolean updateDish = true;
+        if (count == 1) {
+            //存在同名删除后的分类，删除已存在的数据，重新插入新的数据
+            //因为name为索引字段，具有唯一性，用name来取id
+            Dish dishDeleted = dishService.getOne(queryWrapperSameNameDeleted);
+            //彻底移除
+            dishService.removeById(dishDeleted.getId());
+
+        }
+        //清理干净后或者不存在旧记录则更新dish表的基本信息
+        updateDish = this.updateById(dishDto);
+
+        // 清理当前菜品对应的口味数据--dish_flaovr表的delete操作
         LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DishFlavor::getDishId, dishDto.getId());
 
-        dishFlavorService.remove(queryWrapper);
+        // 彻底清理之前的口味
+        //dishFlavorService.remove(queryWrapper);
 
-        //添加当前提交过来的口味数据--dish_flavor表的insert操作
+        // 清理口味标志
+        boolean deleteFlavor = true;
+        List<DishFlavor> dishFlavorList = dishFlavorService.list(queryWrapper);
+        for (DishFlavor dishFlavor : dishFlavorList) {
+            LambdaUpdateWrapper<DishFlavor> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(DishFlavor::getId, dishFlavor.getId());
+            updateWrapper.set(DishFlavor::getIsDeleted, 1);
+
+            deleteFlavor = dishFlavorService.update(updateWrapper);
+
+        }
+
+        // 添加当前提交过来的口味数据--dish_flavor表的insert操作
         List<DishFlavor> flavors = dishDto.getFlavors();
 
         flavors = flavors.stream().peek((item) -> {
             item.setDishId(dishDto.getId());
+            // 重新填补口味id
+            item.setId(IdWorker.getId());
         }).collect(Collectors.toList());
 
         boolean updateFlavor = dishFlavorService.saveBatch(flavors);
@@ -230,7 +285,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //String key = "dish_" + dishDto.getCategoryId() + "_1";
         //redisTemplate.delete(key);
 
-        return updateDish && updateFlavor;
+        return updateDish && deleteFlavor && updateFlavor;
     }
 
     /**
@@ -239,7 +294,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @param ids
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
     public Boolean deleteDishWithFlavor(List<Long> ids) {
 
         //select count(*) from dish where id in (1,2,3) and status = 1
@@ -247,6 +302,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Dish::getId, ids);
         queryWrapper.eq(Dish::getStatus, 1);
+        //添加条件，查询未删除的菜品0
+        queryWrapper.eq(Dish::getIsDeleted, 0);
         int count = this.count(queryWrapper);
 
         //如果不能删除，抛出一个业务异常
@@ -259,15 +316,50 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
         //List<Dish> dishList = dishService.list(wrapper);
 
-        //如果可以删除，先删除套餐表中的数据--dish
-        boolean deleteDish = this.removeByIds(ids);
+        //删除菜品成功标志
+        boolean deleteDish = true;
+        // 删除菜品，伪删除，更新其is_deleted字段为1，先更新dish表
+        for (Long id : ids) {
+            LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(null != id, Dish::getId, id);
+            updateWrapper.set(Dish::getIsDeleted, 1);
+            boolean update = dishService.update(updateWrapper);
+            //有其一更新失败则整体失败
+            if (!update) {
+                deleteDish = false;
+            }
+        }
 
+        //彻底删除菜品
+        //boolean deleteDish = this.removeByIds(ids);
+
+        //彻底删除口味表
         //delete from dish_flavor where dish_id in (1,2,3)
-        LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.in(DishFlavor::getDishId, ids);
+        //LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        //lambdaQueryWrapper.in(DishFlavor::getDishId, ids);
         //删除关系表中的数据---dish_flavor
-        boolean deleteFlavor = dishFlavorService.remove(lambdaQueryWrapper);
+        //boolean deleteFlavor = dishFlavorService.remove(lambdaQueryWrapper);
 
+
+        //删除口味表成功标志
+        boolean deleteDishFlavor = true;
+        // 遍历ids又同时遍历dishFlavor更新菜品
+        for (Long id : ids) {
+            LambdaQueryWrapper<DishFlavor> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(DishFlavor::getDishId, id);
+            List<DishFlavor> dishFlavors = dishFlavorService.list(wrapper);
+
+            for (DishFlavor dishFlavor : dishFlavors) {
+                LambdaUpdateWrapper<DishFlavor> updateWrapperDishFlavor = new LambdaUpdateWrapper<>();
+                updateWrapperDishFlavor.eq(null != dishFlavor.getId(), DishFlavor::getId, dishFlavor.getId());
+                updateWrapperDishFlavor.set(DishFlavor::getIsDeleted, 1);
+                Boolean update = dishFlavorService.update(updateWrapperDishFlavor);
+                //有其一更新失败则整体失败
+                if (!update) {
+                    deleteDishFlavor = false;
+                }
+            }
+        }
 
         //清理所有菜品的缓存数据
         //Set keys = redisTemplate.keys("dish_*");
@@ -278,7 +370,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //    String key = "dish_" + dish.getCategoryId() + "_1";
         //    redisTemplate.delete(key);
         //}
-        return deleteDish && deleteFlavor;
+        return deleteDish && deleteDishFlavor;
     }
 
     /**
@@ -318,7 +410,19 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         log.info("id: {}", id);
 
         //从dish表中查询菜品基本信息
+        LambdaQueryWrapper<Dish> queryWrapperDeletedById = new LambdaQueryWrapper<>();
+        queryWrapperDeletedById.eq(Dish::getId, id);
+        queryWrapperDeletedById.eq(Dish::getIsDeleted, 1);
+        int count = this.count(queryWrapperDeletedById);
+        //count!=0说明该id已被删除
+        if (count==1) {
+            throw new CustomException("该id对应菜品已被删除");
+        }
         Dish dish = this.getById(id);
+
+        if (dish==null) {
+            throw new CustomException("该id对应菜品不存在");
+        }
 
         //动态构造key
         //String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus(); //dish_1397844263642378242_1
@@ -339,6 +443,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //查询当前菜品对应的口味信息，从dish_flavor表中查询
         LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DishFlavor::getDishId, dish.getId());
+        queryWrapper.eq(DishFlavor::getIsDeleted, 0);
         List<DishFlavor> flavors = dishFlavorService.list(queryWrapper);
 
         //加上口味属性赋值

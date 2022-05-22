@@ -47,7 +47,7 @@ public class OrdersController {
      */
     @PostMapping("/submit")
     @ApiOperation(value = "订单提交接口")
-    //@ApiImplicitParam(name = "orders", value = "订单实体")
+    @ApiImplicitParam(name = "orders", value = "订单实体")
     public R<String> submit(@RequestBody Orders orders) {
 
         ordersService.submitOrders(orders);
@@ -149,7 +149,7 @@ public class OrdersController {
      */
     @GetMapping("/page")
     @ApiOperation(value = "管理端订单分页查询接口")
-    //@ApiImplicitParam(name = "queryPageDate", value = "分页查询实体")
+    @ApiImplicitParam(name = "queryPageDate", value = "分页查询实体")
     public R<Page<Order>> page(QueryPageDate queryPageDate) {
 
         Page<Order> orderPage = ordersService.getPage(queryPageDate);
@@ -165,7 +165,7 @@ public class OrdersController {
      */
     @PutMapping
     @ApiOperation(value = "订单状态修改接口")
-    //@ApiImplicitParam(name = "orders", value = "订单实体")
+    @ApiImplicitParam(name = "orders", value = "订单实体")
     public R<String> status(@RequestBody Orders orders) {
 
         ordersService.updateOrdersStatus(orders);
@@ -180,7 +180,7 @@ public class OrdersController {
      */
     @PostMapping("/again")
     @ApiOperation(value = "再来一单接口")
-    //@ApiImplicitParam(name = "map", value = "订单实体")
+    @ApiImplicitParam(name = "map", value = "订单实体")
     public R<String> again(@RequestBody Map<String, String> map) {
 
         ordersService.againOrders(map);

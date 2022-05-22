@@ -2,8 +2,11 @@ package com.itheima.reggie.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.itheima.reggie.dto.SetmealDetailDto;
 import com.itheima.reggie.dto.SetmealDto;
+import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
+import com.itheima.reggie.entity.SetmealDish;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -29,19 +32,17 @@ public interface SetmealService extends IService<Setmeal> {
     public Page<SetmealDto> getPage(int page, int pageSize, String name);
 
     /**
+     * 手机端查看套餐详情具体包含菜品
+     * @param id
+     */
+    public List<SetmealDetailDto> getDishById(Long id);
+
+    /**
      * 新增套餐，同时保存套餐关联关系
      *
      * @param setmealDto
      */
     public Boolean addSetmealWithDish(SetmealDto setmealDto);
-
-    /**
-     * 根据id查询套餐信息和对应的菜品信息
-     *
-     * @param id
-     * @return
-     */
-    public SetmealDto getByIdSetmealWithDish(Long id);
 
     /**
      * 修改套餐
@@ -67,4 +68,12 @@ public interface SetmealService extends IService<Setmeal> {
      * @return
      */
     public Boolean updateStatusByIds(List<Long> ids, Integer status);
+
+    /**
+     * 根据id查询套餐信息和对应的菜品信息
+     *
+     * @param id
+     * @return
+     */
+    public SetmealDto getByIdSetmealWithDish(Long id);
 }

@@ -25,7 +25,7 @@
                 <el-input placeholder=" 请输入手机号码" v-model="form.phone"  maxlength='20'/></el-input>
                 <div class="divSplit"></div>
                 <el-input placeholder=" 请输入验证码" v-model="form.code"  maxlength='20'/></el-input>
-                <span id="getMsgCode" @click='getCode'>获取验证码</span>
+                <span id="getMsgCode" @click='addBtnFlag&&getCode()' >获取验证码</span>
             </div>
             <div class="divMsg" v-if="msgFlag">手机号输入不正确，请重新输入</div>
             <el-button type="primary" :class="{btnSubmit:1===1,btnNoPhone:!form.phone,btnPhone:form.phone}" @click="btnLogin">登录</el-button>
@@ -40,24 +40,7 @@
         <script src="../../backend/plugins/axios/axios.min.js"></script>
         <script src="./../js/request.js"></script>
         <script src="./../api/login.js"></script>
-        <script>
-            var wait=60;
-            function time(span){
-                if (wait==0) {
-                    span.onclick = getCode
-                    span.innerHTML="输入验证码";
-                    span.style.backgroundColor="#ffffff";
-                    wait=60;
-                }else{
-                    span.innerHTML=wait+"秒后重新获取";
-                    span.style.backgroundColor="#ffffff";
-                    wait--;
-                    setTimeout(function(){
-                        time(span)
-                    },1000)
-                }
-            }
-        </script>
+
     </body>
     <script>
         new Vue({
@@ -65,11 +48,13 @@
             data(){
                 return {
                     form:{
-                        phone:'',
-                        code:''
+                        phone:'18322280259',
+                        code:'1234'
                     },
                     msgFlag:false,
-                    loading:false
+                    loading:false,
+                    addBtnFlag:true,
+                    wait:60,
                 }
             },
             computed:{},
@@ -83,11 +68,27 @@
                         this.msgFlag = false
                         //this.form.code = (Math.random()*1000000).toFixed(0)
                         sendMsgApi({phone:this.form.phone})
-                        var span = document.querySelector('span');
-                        span.onclick=null
-                        time(span)
+                        var span = document.querySelector('span')
+                        // span.onclick=null
+                        this.addBtnFlag = false
+                        this.time(span)
                     }else{
                         this.msgFlag = true
+                    }
+                },
+                time(span){
+                    if (this.wait===0) {
+                        span.innerHTML="输入验证码"
+                        span.style.backgroundColor="#ffffff"
+                        this.wait=60
+                        this.addBtnFlag=true
+                    }else{
+                        span.innerHTML=this.wait+"秒后重新获取"
+                        span.style.backgroundColor="#ffffff"
+                        this.wait--
+                        setTimeout(()=>{
+                            this.time(span)
+                        },1000)
                     }
                 },
                 async btnLogin(){

@@ -51,7 +51,13 @@ public class UserController {
 
     }
 
-
+    /**
+     * 用户登录
+     * @param map
+     * @param session
+     * @param response
+     * @return
+     */
     @PostMapping("login")
     @ApiOperation(value = "手机端用户登录接口")
     @ApiImplicitParams({
@@ -65,6 +71,12 @@ public class UserController {
         return user != null ? R.success(user) : R.error("登陆失败");
     }
 
+    /**
+     * 退出登录
+     * @param request
+     * @param response
+     * @return
+     */
     @PostMapping("/loginout")
     @ApiOperation(value = "手机端用户登出接口")
     @ApiImplicitParams({

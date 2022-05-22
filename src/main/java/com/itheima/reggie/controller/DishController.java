@@ -1,34 +1,21 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
-import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
-import com.itheima.reggie.entity.DishFlavor;
-import com.itheima.reggie.service.CategoryService;
-import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 菜品管理
@@ -51,7 +38,7 @@ public class DishController {
      */
     @GetMapping("/list")
     @ApiOperation(value = "菜品列表接口")
-    //@ApiImplicitParam(name = "dish", value = "菜品实体")
+    @ApiImplicitParam(name = "dish", value = "菜品实体")
     @Cacheable(value = "dishCache", key = "#dish.categoryId + '_' + #dish.status")
     public R<Object> list(Dish dish) {
 
@@ -88,7 +75,7 @@ public class DishController {
      */
     @PostMapping
     @ApiOperation(value = "新增菜品接口")
-    //@ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
+    @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> save(@RequestBody DishDto dishDto) {
 
@@ -104,7 +91,7 @@ public class DishController {
      */
     @PutMapping
     @ApiOperation(value = "菜品修改接口")
-    //@ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
+    @ApiImplicitParam(name = "dishDto", value = "菜品包装类实体")
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> update(@RequestBody DishDto dishDto) {
 
@@ -120,7 +107,7 @@ public class DishController {
      */
     @DeleteMapping
     @ApiOperation(value = "菜品删除接口")
-    //@ApiImplicitParam(name = "ids", value = "菜品编号列表")
+    @ApiImplicitParam(name = "ids", value = "菜品编号列表")
     @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids) {
 
@@ -156,7 +143,7 @@ public class DishController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "查询菜品接口")
-    //@ApiImplicitParam(name = "id", value = "菜品编号")
+    @ApiImplicitParam(name = "id", value = "菜品编号")
     public R<DishDto> get(@PathVariable Long id) {
 
         DishDto dishDto = dishService.getByIdDishWithFlavor(id);

@@ -9,7 +9,7 @@ import java.util.List;
 public interface CategoryService extends IService<Category> {
 
     /**
-     * 获取分类列表
+     * 手机端获取分类列表
      *
      * @param category
      * @return

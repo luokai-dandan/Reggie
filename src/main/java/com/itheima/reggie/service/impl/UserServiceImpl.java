@@ -30,7 +30,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     //注入redis
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<Object, Object> redisTemplate;
 
     // 腾讯云短信相关参数
     @Value("${custom-parameters.send-msg.secret-id}")
@@ -48,7 +48,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Value("${custom-parameters.send-msg.msg-head}")
     private String msgHead;
     @Value("${custom-parameters.send-msg.enable}")
-    private String enable;
+    private String sendMsgEnable;
+
+    //是否启用cookie
+    @Value("${custom-parameters.cookie.enable}")
+    private String cookieEnable;
 
     /**
      * 发送短信验证码
@@ -70,7 +74,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String verificationCode = null;
 
             //启用腾讯短信验证码
-            if (enable.equals("true")) {
+            if (sendMsgEnable.equals("true")) {
                 // 生成随机的验证码
                 verificationCode = ValidateCodeUtils.generateValidateCode(4).toString();
                 // 调用腾讯云短信服务API完成发送短信
@@ -110,7 +114,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //String codeInSession = (String) session.getAttribute(phone);
 
         //从redis中获取缓存的验证码
-        String codeInSession = redisTemplate.opsForValue().get(phone);
+        String codeInSession = (String) redisTemplate.opsForValue().get(phone);
 
         //进行验证码的比对
         if (code.equals(codeInSession)) {
@@ -127,17 +131,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user.setStatus(1);
                 userService.save(user);
             }
+
+            //将用户id缓存到redis中
+            redisTemplate.opsForValue().set("user", user.getId(),60, TimeUnit.MINUTES);
+
             //将用户信息放入session
             session.setAttribute("user", user.getId());
 
-            //写入cookie
-            Cookie cooPhone = new Cookie("loginPhone", phone);
-            cooPhone.setMaxAge(10 * 24 * 60 * 60);
-            response.addCookie(cooPhone);
+            //是否写入cookie
+            if (cookieEnable.equals("true")) {
+                //写入cookie
+                Cookie cooPhone = new Cookie("loginPhone", phone);
+                cooPhone.setMaxAge(10 * 24 * 60 * 60);
+                response.addCookie(cooPhone);
 
-            Cookie cooCode = new Cookie("loginCode", code);
-            cooCode.setMaxAge(10 * 24 * 60 * 60);
-            response.addCookie(cooCode);
+                Cookie cooCode = new Cookie("loginCode", code);
+                cooCode.setMaxAge(10 * 24 * 60 * 60);
+                response.addCookie(cooCode);
+            }
 
             //登陆成功，删除redis中缓存的验证码
             redisTemplate.delete(phone);
@@ -157,14 +168,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //清理Session中保存的当前登陆员工的id
         request.getSession().removeAttribute("user");
 
-        //清理cookie
-        Cookie cooPhone = new Cookie("loginPhone", "1");
-        cooPhone.setMaxAge(0);
-        response.addCookie(cooPhone);
+        //是否写入cookie
+        if (cookieEnable.equals("true")) {
 
-        Cookie cooCode = new Cookie("loginCode", "1");
-        cooCode.setMaxAge(0);
-        response.addCookie(cooCode);
+            //清理cookie
+            Cookie cooPhone = new Cookie("loginPhone", "1");
+            cooPhone.setMaxAge(0);
+            response.addCookie(cooPhone);
+
+            Cookie cooCode = new Cookie("loginCode", "1");
+            cooCode.setMaxAge(0);
+            response.addCookie(cooCode);
+        }
+
+        //删除id缓存
+        redisTemplate.delete("user");
     }
 
 }

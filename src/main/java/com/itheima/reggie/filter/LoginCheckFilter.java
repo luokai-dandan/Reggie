@@ -4,16 +4,21 @@ import com.alibaba.fastjson.JSON;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
+import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
- * 检查用户是否已经完成登录
+ * 检查管理端用户是否已经完成登录
  */
 @Slf4j
 @WebFilter(filterName = "LoginCheckFilter", urlPatterns = "/*")
@@ -37,8 +42,8 @@ public class LoginCheckFilter implements Filter {
                 "/employee/login",
                 "/employee/logout",
                 "/backend/**",
-                "/front/**",
                 "/common/**",
+                "/front/**",
                 "/user/sendMsg", //移动端发送短信
                 "/user/login", //移动端登陆
                 "/doc.html",
@@ -83,7 +88,6 @@ public class LoginCheckFilter implements Filter {
         //5、如果未登录则返回未登录结果，通过输出流方式向客户端页面响应数据
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
         return;
-
     }
 
     /**

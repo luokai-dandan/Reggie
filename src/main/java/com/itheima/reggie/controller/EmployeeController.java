@@ -1,8 +1,6 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
@@ -11,19 +9,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 
 @Slf4j
 @RestController
@@ -85,7 +76,7 @@ public class EmployeeController {
      */
     @PostMapping("/logout")
     @ApiOperation(value = "管理端员工登出接口")
-    //@ApiImplicitParam(name = "request", value = "请求对象")
+    @ApiImplicitParam(name = "request", value = "请求对象")
     public R<String> logout(HttpServletRequest request, HttpServletResponse response) {
 
         Boolean logout = employeeService.logout(request, response);
@@ -122,7 +113,7 @@ public class EmployeeController {
      */
     @PostMapping
     @ApiOperation(value = "套餐分页查询接口")
-    //@ApiImplicitParam(name = "employee", value = "员工实体")
+    @ApiImplicitParam(name = "employee", value = "员工实体")
     public R<String> save(@RequestBody Employee employee) {
 
         Boolean addEmployee = employeeService.addEmployee(employee);
@@ -137,7 +128,7 @@ public class EmployeeController {
      */
     @PutMapping
     @ApiOperation(value = "员工信息修改接口")
-    //@ApiImplicitParam(name = "employee", value = "员工实体")
+    @ApiImplicitParam(name = "employee", value = "员工实体")
     public R<String> update(@RequestBody Employee employee) {
 
         Boolean update = employeeService.updateEmployee(employee);
@@ -152,7 +143,7 @@ public class EmployeeController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "员工信息查询接口")
-    //@ApiImplicitParam(name = "id", value = "员工编号")
+    @ApiImplicitParam(name = "id", value = "员工编号")
     public R<Employee> getById(@PathVariable Long id) {
 
         Employee employee = employeeService.getEmployeeById(id);

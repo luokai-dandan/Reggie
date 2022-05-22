@@ -110,21 +110,20 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
 
-
 # 自定义参数
 custom-parameters:
   # 图片相关参数
   path:
     # 图片保存路径
     # centos保存路径
-    save-image-path: /usr/local/reggie/upload/
+#    save-image-path: /usr/local/reggie/upload/
     # windows保存路径
-#    save-image-path: D:\Java\项目\瑞吉外卖\myCode\upload\
+    save-image-path: D:\Java\项目\瑞吉外卖\myCode\upload\
 
   # 短信验证码
   send-msg:
-    # 是否启用
-    enable: true
+    # 是否启用短信发送验证码
+    enable: false
     # 腾讯云账户密钥对Id
     secret-id: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
     # 腾讯云账户密钥对Key
@@ -139,3 +138,7 @@ custom-parameters:
     template-id: 1401840
     # 消息头
     msg-head: 【瑞吉外卖】
+
+  # cookie
+  cookie:
+    enable: false

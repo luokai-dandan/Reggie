@@ -9,8 +9,10 @@ import com.itheima.reggie.mapper.AddressBookMapper;
 import com.itheima.reggie.service.AddressBookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -19,6 +21,9 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
 
     @Autowired
     private AddressBookService addressBookService;
+
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 查询指定用户的全部地址
@@ -29,19 +34,25 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
     @Override
     public List<AddressBook> getList(AddressBook addressBook) {
 
-        addressBook.setUserId(BaseContext.getCurrentId());
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
+
+        //addressBook.setUserId(BaseContext.getCurrentId());
         //log.info("addressBook:{}", addressBook);
+        addressBook.setUserId(userId);
 
         //当前无默认地址将第一条地址设为默认
         LambdaQueryWrapper<AddressBook> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, addressBook.getUserId());
+        //查询该用户名下地址
+        wrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, userId);
+        wrapper.eq(AddressBook::getIsDeleted, 0);
         int countAll = addressBookService.count(wrapper);
         wrapper.eq(AddressBook::getIsDefault, 1);
         int countDefault = addressBookService.count(wrapper);
         if (countAll > 0 && countDefault == 0) {
 
             LambdaQueryWrapper<AddressBook> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, addressBook.getUserId());
+            lambdaQueryWrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, userId);
+            lambdaQueryWrapper.eq( AddressBook::getIsDeleted, 0);
             lambdaQueryWrapper.eq(AddressBook::getIsDefault, 0);
             AddressBook one = addressBookService.getOne(lambdaQueryWrapper, false);
             one.setIsDefault(1);
@@ -51,12 +62,11 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
         //条件构造器
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
         //SQL:select * from address_book where user_id = ? order by update_time desc
-        queryWrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, addressBook.getUserId());
+        queryWrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, userId);
+        queryWrapper.eq(AddressBook::getIsDeleted, 0);
         queryWrapper.orderByDesc(AddressBook::getIsDefault).orderByDesc(AddressBook::getUpdateTime);
 
-        List<AddressBook> addressBookList = addressBookService.list(queryWrapper);
-
-        return addressBookList;
+        return addressBookService.list(queryWrapper);
     }
 
     /**
@@ -68,7 +78,27 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
     @Override
     public AddressBook addAddr(AddressBook addressBook) {
 
-        addressBook.setUserId(BaseContext.getCurrentId());
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
+
+        //addressBook.setUserId(BaseContext.getCurrentId());
+        //设置添加地址所属用户为当前用户
+        addressBook.setUserId(userId);
+        //填写空白字段
+        addressBook.setCreateTime(LocalDateTime.now());
+        addressBook.setCreateUser(userId);
+        addressBook.setUpdateTime(LocalDateTime.now());
+        addressBook.setUpdateUser(userId);
+
+        //查询是否当前用户下是否存在默认地址，不存在则设置当前添加的地址为默认地址
+        LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(null != addressBook.getUserId(), AddressBook::getUserId, userId);
+        queryWrapper.eq( AddressBook::getIsDeleted, 0);
+        queryWrapper.eq(AddressBook::getIsDefault, 1);
+        int count = addressBookService.count(queryWrapper);
+        if (count==0) {
+            addressBook.setIsDefault(1);
+        }
+
         //log.info("addressBook: {}", addressBook);
         addressBookService.save(addressBook);
         return addressBook;
@@ -83,11 +113,17 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
     @Override
     public Boolean deleteAddr(long ids) {
 
-        return addressBookService.removeById(ids);
+        //return addressBookService.removeById(ids);
+        LambdaUpdateWrapper<AddressBook> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(AddressBook::getId, ids);
+        //伪删除，将is_delete字段改为1
+        updateWrapper.set(AddressBook::getIsDeleted, 1);
+
+        return addressBookService.update(updateWrapper);
     }
 
     /**
-     * 设置总有一个默认地址
+     * 设置默认地址
      *
      * @param addressBook
      * @return
@@ -95,9 +131,12 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
     @Override
     public AddressBook setDefaultAddr(AddressBook addressBook) {
 
+        Long userId = (Long) redisTemplate.opsForValue().get("user");
+
         //log.info("addressBook:{}", addressBook);
         LambdaUpdateWrapper<AddressBook> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(AddressBook::getUserId, BaseContext.getCurrentId());
+        wrapper.eq(AddressBook::getUserId, userId);
+        wrapper.eq(AddressBook::getIsDeleted, 0);
         wrapper.set(AddressBook::getIsDefault, 0);
         //SQL:update address_book set is_default = 0 where user_id = ?
         addressBookService.update(wrapper);
@@ -130,8 +169,9 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
     public AddressBook getAddrDefault() {
 
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(AddressBook::getUserId, BaseContext.getCurrentId());
+        queryWrapper.eq(AddressBook::getUserId, redisTemplate.opsForValue().get("user"));
         queryWrapper.eq(AddressBook::getIsDefault, 1);
+        queryWrapper.eq(AddressBook::getIsDeleted, 0);
 
         //SQL:select * from address_book where user_id = ? and is_default = 1
         return addressBookService.getOne(queryWrapper);
@@ -147,6 +187,5 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
 
         return addressBookService.updateById(addressBook);
     }
-
 
 }

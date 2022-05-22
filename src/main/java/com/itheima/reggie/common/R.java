@@ -27,7 +27,7 @@ public class R<T> implements Serializable {
     private Map map = new HashMap(); //动态数据
 
     @ApiOperation(value = "返回成功结果接口")
-    //@ApiImplicitParam(name = "object", value = "返回数据")
+    @ApiImplicitParam(name = "object", value = "返回数据")
     public static <T> R<T> success(T object) {
         R<T> r = new R<T>();
         r.data = object;
@@ -36,7 +36,7 @@ public class R<T> implements Serializable {
     }
 
     @ApiOperation(value = "返回失败结果接口")
-    //@ApiImplicitParam(name = "object", value = "返回数据")
+    @ApiImplicitParam(name = "object", value = "返回数据")
     public static <T> R<T> error(String msg) {
         R r = new R();
         r.msg = msg;
