@@ -116,14 +116,14 @@ custom-parameters:
   path:
     # 图片保存路径
     # centos保存路径
-#    save-image-path: /usr/local/reggie/upload/
+    save-image-path: /usr/local/reggie/upload/
     # windows保存路径
-    save-image-path: D:\Java\项目\瑞吉外卖\myCode\upload\
+#    save-image-path: D:\Java\项目\瑞吉外卖\myCode\upload\
 
   # 短信验证码
   send-msg:
     # 是否启用短信发送验证码
-    enable: false
+    enable: true
     # 腾讯云账户密钥对Id
     secret-id: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
     # 腾讯云账户密钥对Key
@@ -141,4 +141,4 @@ custom-parameters:
 
   # cookie
   cookie:
-    enable: false
+    enable: true
