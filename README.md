@@ -5,7 +5,7 @@
 网页端管理外卖后台和仿手机端模拟客户端订购外卖及提交外卖订单
 哔哩哔哩 https://www.bilibili.com/video/BV13a411q753?spm_id_from=333.337.search-card.all.click
 
-### 软件架构
+### 技术架构
 1. 后台系统使用SpringBoot开发，前端使用Vue框架实现前后端分离，持久层使用MybatisPlus框架。
 2. 数据库使用MySQL5.7，订单信息及详情通过Kfaka消息队列发送到MongoDB中保存，后台订单系统均通过MongoDB读取。
 3. MySQL采用了主从复制存储数据，部分数据采用RedisTemplate和SpringCache缓存到Redis中。
@@ -13,8 +13,9 @@
 5. 只允许主数据库进行增加(Create)、更新(Update)和删除(Delete)，从数据库读取查询(Retrieve)。
 6. 软件均通过Docker进行拉取安装，并通过docker安装Portainer并开放9000端口可视化docker容器和镜像。
 7. 使用Swagger进行接口测试。
+8. 前端打包dist部署Nginx，后端打jar包后统一部署云服务器，并通过远程访问。
 
-### 安装教程
+### 软件版本
 1. SpringBoot 2.4.5
 2. MySQL 5.7
 3. Redis 6.2.6
@@ -22,9 +23,10 @@
 5. Kafka 2.3.1
 6. Jdk 8
 7. Maven 3.6.3   
-8. Centos Linux 7
+8. Centos 7
 9. 短信平台使用腾讯云短信服务
 10. Docker 1.13.1
+11. Nginx 1.22.0
 
 ### 项目截图
 #### docker安装所需软件
