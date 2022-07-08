@@ -8,7 +8,7 @@
 ### 技术架构
 1. 后台系统使用SpringBoot开发，前端使用Vue框架实现前后端分离，持久层使用MybatisPlus框架。
 2. 数据库使用MySQL5.7，订单信息及详情通过Kfaka消息队列发送到MongoDB中保存，后台订单系统均通过MongoDB读取。
-3. MySQL采用了主从复制存储数据，部分数据采用RedisTemplate和SpringCache缓存到Redis中。
+3. MySQL采用了主从复制、读写分离存储数据，部分数据采用RedisTemplate和SpringCache缓存到Redis中。
 4. 同时Redis也采用了主从复制，且MySQL和Redis从数据库都不允许增加(Create)、更新(Update)和删除(Delete)。
 5. 只允许主数据库进行增加(Create)、更新(Update)和删除(Delete)，从数据库读取查询(Retrieve)。
 6. 软件均通过Docker进行拉取安装，并通过docker安装Portainer并开放9000端口可视化docker容器和镜像。
@@ -88,10 +88,19 @@
 ![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/mongo%E8%AE%A2%E5%8D%95%E6%9F%A5%E8%AF%A2.png)
 #### 前台kafka发送订单消息
 ![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/kafka%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF.png)
+#### kafka配置
+![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/kafka%E9%85%8D%E7%BD%AE.png)
 #### 前台kafka接收消息
 ![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/kafka%E6%8E%A5%E5%8F%97%E6%B6%88%E6%81%AF.png)
 #### 前台查看订单和再来一单 
 ![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/%E8%AE%A2%E5%8D%95%E6%9F%A5%E8%AF%A2%2B%E5%86%8D%E6%9D%A5%E4%B8%80%E5%8D%95.png)
 #### 前台个人主页 
 ![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5.png)
-
+#### mongodb和redis配置
+![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/mongodb%E5%92%8Credis%E9%85%8D%E7%BD%AE.png)
+#### 主从MySQL 
+![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/%E4%B8%BB%E4%BB%8EMySQL.png)
+#### 主从MySQL配置
+![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/%E4%B8%BB%E4%BB%8EMySQL%E9%85%8D%E7%BD%AE.png)
+#### 主动Redis 
+![avatar](https://lk-1303842271.cos.ap-beijing.myqcloud.com/%E7%91%9E%E5%90%89%E5%A4%96%E5%8D%96%E9%A1%B9%E7%9B%AE%E6%88%AA%E5%9B%BE/%E4%B8%BB%E4%BB%8ERedis.png)
