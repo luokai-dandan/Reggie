@@ -126,9 +126,9 @@ custom-parameters:
     # 是否启用短信发送验证码
     enable: true
     # 腾讯云账户密钥对Id
-    secret-id: AKIDX0V3SjmbGwdM1c8whMxRTXaVHqFYikeL
+    secret-id: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     # 腾讯云账户密钥对Key
-    secret-key: c5OfwFZoHZlssjZJxhIgu7Nf2SsLuMn6
+    secret-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     # SDK默认超时时间
     conn-timeout: 5
     # 短信应用ID
